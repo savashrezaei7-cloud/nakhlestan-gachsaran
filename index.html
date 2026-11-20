@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#14251b">
 <title>نخلستان ماهان گچساران</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--bg:#101c15;--panel:#1b2d21;--gold:#e8c77d;--muted:#b4c4b4;--line:#ffffff18}
 *{box-sizing:border-box}
@@ -98,7 +99,11 @@ header{padding:14px 16px 10px;background:#14251bf2;position:sticky;top:0;z-index
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
 
+const initData = tg.initData;
 const $=id=>document.getElementById(id);
 const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 
@@ -526,7 +531,39 @@ toast('بازی از ابتدا شروع شد');
 $('dailyBtn').onclick=()=>{
 toast('مأموریت‌ها در نسخه بعدی اضافه می‌شوند');
 };
+async function loginWithTelegram() {
+  if (!initData) {
+    toast('بازی را از طریق ربات تلگرام باز کن');
+    return;
+  }
 
+  try {
+    const res = await fetch(
+      'https://nakhlestan-bot.savashrezaei7.workers.dev/api/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ initData })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      toast('ورود به حساب با مشکل مواجه شد');
+      return;
+    }
+
+    toast('ورود موفقیت‌آمیز بود 🌴');
+  } catch (error) {
+    toast('ارتباط با سرور برقرار نشد');
+  }
+}
+
+loginWithTelegram();
+  
 ui();
 </script>
 </body>
