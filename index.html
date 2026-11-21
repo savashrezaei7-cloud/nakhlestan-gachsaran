@@ -1,5 +1,726 @@
-
 <!doctype html>
+
+<html lang="fa" dir="rtl">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<meta name="theme-color" content="#14251b">
+
+<title>نخلستان ماهان گچساران</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+
+:root{--bg:#101c15;--panel:#1b2d21;--gold:#e8c77d;--muted:#b4c4b4;--line:#ffffff18}
+
+*{box-sizing:border-box}
+
+body{margin:0;background:var(--bg);color:#f4f3e8;font-family:Vazirmatn,Tahoma,sans-serif}
+
+.app{max-width:620px;margin:auto;min-height:100dvh;padding-bottom:82px;background:linear-gradient(#17291e,#101c15)}
+
+header{padding:14px 16px 10px;background:#14251bf2;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+
+.brand{font-weight:900;font-size:18px}
+
+.tag{font-size:11px;color:var(--muted)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}
+
+.stat{background:#ffffff0b;border:1px solid var(--line);border-radius:12px;padding:7px 3px;text-align:center;color:var(--muted);font-size:10px}
+
+.stat b{display:block;color:white;font-size:17px}
+
+.wrap{padding:12px}
+
+.farmhead{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 9px}
+
+.farmhead strong{font-size:16px}
+
+.farmhead span{font-size:11px;color:var(--muted)}
+
+#scene{height:min(66vh,520px);min-height:360px;width:100%;display:block;border-radius:20px;overflow:hidden;border:1px solid #ffffff20;background:#8eb4a1;touch-action:none}
+
+.hint{text-align:center;font-size:11px;color:#e9e5d4;padding:9px 8px;background:#ffffff0b;border-radius:12px;margin-top:9px}
+
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:11px}
+
+.act{border:1px solid #ffffff18;border-radius:14px;background:linear-gradient(145deg,#34563b,#203c2a);color:white;padding:10px 3px;min-height:78px;font-family:inherit}
+
+.act span{display:block;font-size:22px}
+
+.act b{display:block;font-size:10px;margin-top:4px}
+
+.act:disabled{opacity:.35}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px;margin-top:11px}
+
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12px}
+
+.muted{color:var(--muted);font-size:10px}
+
+.bar{height:9px;background:#ffffff17;border-radius:20px;overflow:hidden;margin-top:10px}
+
+.bar i{height:100%;width:0;display:block;background:linear-gradient(90deg,#80b86b,#e8c77d);transition:width .25s}
+
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,620px);display:flex;justify-content:space-around;padding:10px 6px calc(10px + env(safe-area-inset-bottom));background:#111e17f5;border-top:1px solid var(--line);z-index:8}
+
+.bottom button{background:none;border:0;color:var(--muted);font:inherit;font-size:10px}
+
+.bottom button.active{color:var(--gold)}
+
+.toast{position:fixed;z-index:10;bottom:90px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
+
+.toast.show{opacity:1}
+
+.hidden{display:none!important}
+
+.primary{background:var(--gold);color:#2a2417;border:0;border-radius:10px;padding:8px 13px;font:700 11px Vazirmatn}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+
+<div class="brand">🌴 نخلستان ماهان گچساران</div>
+
+<div class="tag">از خاک گچساران تا سفره جهان</div>
+
+<div class="stats">
+
+<div class="stat">سکه<b id="coins">۱۲۰</b></div>
+
+<div class="stat">امتیاز<b id="score">۰</b></div>
+
+<div class="stat">سطح<b id="level">۱</b></div>
+
+<div class="stat">نخل<b id="trees">۰</b></div>
+
+</div>
+
+</header>
+
+<main class="wrap" id="farm">
+
+<div class="farmhead"><strong>نخلستان من</strong><span id="status">در حال بارگذاری...</span></div>
+
+<canvas id="scene"></canvas>
+
+<div class="hint" id="hint">در حال دریافت اطلاعات نخلستان...</div>
+
+<div class="actions">
+
+<button class="act" id="dig"><span>🪏</span><b>آماده‌سازی زمین</b></button>
+
+<button class="act" id="plant" disabled><span>🌱</span><b>کاشت نهال</b></button>
+
+<button class="act" id="water" disabled><span>💧</span><b>آبیاری</b></button>
+
+<button class="act" id="fert" disabled><span>🌿</span><b>کوددهی</b></button>
+
+</div>
+
+<div class="panel">
+
+<div class="row"><b>رشد نخل</b><span id="stage" class="muted">در حال بارگذاری</span></div>
+
+<div class="bar"><i id="growthbar"></i></div>
+
+<div class="row" style="margin-top:8px">
+
+<span id="growth">۰٪ رشد</span>
+
+<span id="inventory" class="muted">نهال: ۱ · آب: ۳ · کود: ۱</span>
+
+</div>
+
+<div style="margin-top:10px;text-align:center">
+
+<button id="harvest" class="primary hidden">برداشت خرما</button>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<div class="row"><b>توسعه نخلستان</b><span class="muted">خرید ابزار و منابع</span></div>
+
+<div class="row" style="margin-top:10px"><span>💧 یک واحد آب — ۱۵ سکه</span><button class="primary" data-buy="buy_water">خرید</button></div>
+
+<div class="row" style="margin-top:10px"><span>🌿 یک واحد کود — ۲۵ سکه</span><button class="primary" data-buy="buy_fertilizer">خرید</button></div>
+
+<div class="row" style="margin-top:10px"><span>🌱 یک نهال مجول — ۴۰ سکه</span><button class="primary" data-buy="buy_seedling">خرید</button></div>
+
+</div>
+
+</main>
+
+<nav class="bottom">
+
+<button class="active">🌴 نخلستان</button>
+
+<button id="dailyBtn">📋 مأموریت‌ها</button>
+
+<button id="reset">↻ شروع دوباره</button>
+
+</nav>
+
+<div id="toast" class="toast"></div>
+
+</div>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+<script type="module">
+
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const WORKER_URL="https://nakhlestan-bot.savashreza7.workers.dev";
+
+const tg=window.Telegram?.WebApp;
+
+if(tg){tg.ready();tg.expand();}
+
+const initData=tg?.initData||"";
+
+const $=id=>document.getElementById(id);
+
+const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+
+const defaults={
+
+coins:120,score:0,level:1,trees:0,xp:0,growth:0,
+
+prepared:0,planted:0,watered:0,fertilized:0,
+
+seedling:1,water:3,fertilizer:1
+
+};
+
+let state={...defaults};
+
+let serverReady=false;
+
+let busy=false;
+
+function toast(t){
+
+$('toast').textContent=t;
+
+$('toast').classList.add('show');
+
+setTimeout(()=>$('toast').classList.remove('show'),2200);
+
+}
+
+function applyServerState(s){
+
+if(!s)return;
+
+state={
+
+...defaults,
+
+...s,
+
+prepared:Number(s.prepared),
+
+planted:Number(s.planted),
+
+watered:Number(s.watered),
+
+fertilized:Number(s.fertilized)
+
+};
+
+serverReady=true;
+
+ui();
+
+}
+
+async function api(path,data={}){
+
+if(!initData)throw new Error("بازی را از داخل ربات تلگرام باز کنید");
+
+const res=await fetch(WORKER_URL+path,{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({initData,...data})
+
+});
+
+const result=await res.json();
+
+if(!res.ok||!result.success)throw new Error(result.error||"ارتباط با سرور برقرار نشد");
+
+return result;
+
+}
+
+async function login(){
+
+try{
+
+$('status').textContent="در حال اتصال به سرور...";
+
+const result=await api("/api/login");
+
+applyServerState(result.state);
+
+toast("اطلاعات نخلستان دریافت شد");
+
+}catch(error){
+
+$('status').textContent="خطا در اتصال";
+
+$('hint').textContent=error.message;
+
+toast(error.message);
+
+console.error(error);
+
+}
+
+}
+
+const canvas=$('scene');
+
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+renderer.shadowMap.enabled=true;
+
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+
+const scene=new THREE.Scene();
+
+scene.background=new THREE.Color(0x9fc5b0);
+
+scene.fog=new THREE.Fog(0x9fc5b0,18,42);
+
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);
+
+let camAngle=.72,camRadius=15,camHeight=10;
+
+scene.add(new THREE.HemisphereLight(0xe5f5e8,0x65513a,2));
+
+const sun=new THREE.DirectionalLight(0xffedc7,2.6);
+
+sun.position.set(-7,14,8);
+
+sun.castShadow=true;
+
+sun.shadow.mapSize.set(1024,1024);
+
+scene.add(sun);
+
+const mat=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness});
+
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),mat(0x9a8056));
+
+ground.rotation.x=-Math.PI/2;
+
+ground.position.y=-.12;
+
+ground.receiveShadow=true;
+
+scene.add(ground);
+
+for(let i=0;i<9;i++){
+
+const hill=new THREE.Mesh(new THREE.SphereGeometry(1,18,12),mat(i%2?0x718b68:0x82936b));
+
+hill.scale.set(3+Math.random()*3,1.4+Math.random()*1.5,1.8);
+
+hill.position.set(-17+i*4,-.1,-17-Math.random()*3);
+
+scene.add(hill);
+
+}
+
+const plot=new THREE.Mesh(new THREE.BoxGeometry(9,.25,9),mat(0x705032));
+
+plot.position.y=.02;
+
+plot.receiveShadow=true;
+
+plot.castShadow=true;
+
+scene.add(plot);
+
+const inner=new THREE.Mesh(new THREE.PlaneGeometry(8.5,8.5),mat(0x89643d));
+
+inner.rotation.x=-Math.PI/2;
+
+inner.position.y=.16;
+
+inner.receiveShadow=true;
+
+scene.add(inner);
+
+const borderMat=mat(0xb8a078);
+
+for(const [x,z,sx,sz] of [[0,-4.55,9.2,.18],[0,4.55,9.2,.18],[-4.55,0,.18,9.2],[4.55,0,.18,9.2]]){
+
+const b=new THREE.Mesh(new THREE.BoxGeometry(sx,.28,sz),borderMat);
+
+b.position.set(x,.22,z);
+
+b.castShadow=true;
+
+scene.add(b);
+
+}
+
+const channel=new THREE.Mesh(new THREE.BoxGeometry(.45,.12,7.7),mat(0x4e6d57));
+
+channel.position.set(3.75,.25,0);
+
+scene.add(channel);
+
+const waterLine=new THREE.Mesh(
+
+new THREE.BoxGeometry(.28,.035,7.3),
+
+new THREE.MeshStandardMaterial({color:0x56b6d0,metalness:.1,roughness:.25})
+
+);
+
+waterLine.position.set(3.75,.33,0);
+
+waterLine.visible=false;
+
+scene.add(waterLine);
+
+const hole=new THREE.Mesh(new THREE.CylinderGeometry(.72,.85,.16,32),mat(0x3b2819));
+
+hole.position.set(0,.29,0);
+
+hole.visible=false;
+
+scene.add(hole);
+
+const soilRing=new THREE.Mesh(new THREE.TorusGeometry(.8,.14,8,32),mat(0x9b7045));
+
+soilRing.rotation.x=Math.PI/2;
+
+soilRing.position.set(0,.35,0);
+
+soilRing.visible=false;
+
+scene.add(soilRing);
+
+let palm=null;
+
+function makePalm(scale=1){
+
+const g=new THREE.Group();
+
+const trunkMat=mat(0x76502f);
+
+const leafMat=mat(0x28633a);
+
+const leafLight=mat(0x4e8a45);
+
+const fruitMat=mat(0xc77d32);
+
+const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.38,3.1,12,5),trunkMat);
+
+trunk.position.y=1.65;
+
+trunk.castShadow=true;
+
+g.add(trunk);
+
+for(let j=0;j<8;j++){
+
+const a=j*Math.PI/4;
+
+const pts=[
+
+new THREE.Vector3(0,3.1,0),
+
+new THREE.Vector3(Math.cos(a)*.75,3.8,Math.sin(a)*.75),
+
+new THREE.Vector3(Math.cos(a)*1.65,3.25,Math.sin(a)*1.65)
+
+];
+
+const curve=new THREE.CatmullRomCurve3(pts);
+
+const stem=new THREE.Mesh(new THREE.TubeGeometry(curve,18,.045,5,false),leafLight);
+
+g.add(stem);
+
+for(let k=1;k<=8;k++){
+
+const t=k/9;
+
+const p=curve.getPoint(t);
+
+for(const side of [-1,1]){
+
+const dir=new THREE.Vector3(Math.cos(a+side*.75),-.25,Math.sin(a+side*.75)).normalize();
+
+const leaf=new THREE.Mesh(new THREE.ConeGeometry(.075,.72,5),k%2?leafMat:leafLight);
+
+leaf.position.copy(p).addScaledVector(dir,.33);
+
+leaf.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+
+leaf.castShadow=true;
+
+g.add(leaf);
+
+}
+
+}
+
+}
+
+for(let i=0;i<9;i++){
+
+const f=new THREE.Mesh(new THREE.SphereGeometry(.11,10,8),fruitMat);
+
+const a=i*2.4;
+
+f.position.set(Math.cos(a)*.38,2.9+(i%3)*-.16,Math.sin(a)*.38);
+
+g.add(f);
+
+}
+
+g.scale.setScalar(scale);
+
+return g;
+
+}
+
+function refreshPalm(){
+
+if(palm){
+
+scene.remove(palm);
+
+palm.traverse(o=>{if(o.geometry)o.geometry.dispose();});
+
+palm=null;
+
+}
+
+if(state.planted){
+
+palm=makePalm(.35+state.growth/100*.65);
+
+palm.position.set(0,.35,0);
+
+scene.add(palm);
+
+}
+
+}
+
+function resize(){
+
+const w=canvas.clientWidth;
+
+const h=canvas.clientHeight;
+
+renderer.setSize(w,h,false);
+
+camera.aspect=w/h;
+
+camera.updateProjectionMatrix();
+
+}
+
+function updateCamera(){
+
+camera.position.set(Math.sin(camAngle)*camRadius,camHeight,Math.cos(camAngle)*camRadius);
+
+camera.lookAt(0,1.3,0);
+
+}
+
+let drag=false,lastX=0,lastY=0;
+
+canvas.addEventListener('pointerdown',e=>{
+
+drag=true;lastX=e.clientX;lastY=e.clientY;
+
+canvas.setPointerCapture(e.pointerId);
+
+});
+
+canvas.addEventListener('pointermove',e=>{
+
+if(!drag)return;
+
+camAngle+=(e.clientX-lastX)*.008;
+
+camHeight=Math.max(5,Math.min(15,camHeight+(lastY-e.clientY)*.035));
+
+lastX=e.clientX;lastY=e.clientY;
+
+updateCamera();
+
+});
+
+canvas.addEventListener('pointerup',()=>drag=false);
+
+canvas.addEventListener('wheel',e=>{
+
+camRadius=Math.max(10,Math.min(21,camRadius+e.deltaY*.01));
+
+updateCamera();
+
+},{passive:true});
+
+function loop(){
+
+requestAnimationFrame(loop);
+
+renderer.render(scene,camera);
+
+}
+
+updateCamera();
+
+resize();
+
+window.addEventListener('resize',resize);
+
+loop();
+
+function ui(){
+
+$('coins').textContent=fa(state.coins);
+
+$('score').textContent=fa(state.score);
+
+$('level').textContent=fa(state.level);
+
+$('trees').textContent=fa(state.trees);
+
+$('growthbar').style.width=state.growth+'%';
+
+$('growth').textContent=fa(state.growth)+'٪ رشد';
+
+$('inventory').textContent=`نهال: ${fa(state.seedling)} · آب: ${fa(state.water)} · کود: ${fa(state.fertilizer)}`;
+
+$('dig').disabled=!serverReady||busy||!!state.prepared;
+
+$('plant').disabled=!serverReady||busy||!state.prepared||!!state.planted||state.seedling<1;
+
+$('water').disabled=!serverReady||busy||!state.planted||!!state.watered||state.water<1;
+
+$('fert').disabled=!serverReady||busy||!state.planted||!!state.fertilized||state.fertilizer<1;
+
+$('harvest').classList.toggle('hidden',!state.planted||state.growth<100);
+
+$('harvest').disabled=!serverReady||busy;
+
+$('status').textContent=state.growth>=100?'آماده برداشت':state.planted?'نخل در حال رشد':state.prepared?'گودال آماده کاشت':'زمین آماده کاشت';
+
+$('stage').textContent=state.growth>=100?'نخل بارده':state.planted?'نهال مجول':state.prepared?'آماده کاشت':'زمین آماده نشده';
+
+$('hint').textContent=!state.prepared?'برای شروع، زمین را آماده کن.':!state.planted?'گودال آماده است؛ نهال مجول را بکار.':state.growth<100?'با آبیاری و کوددهی به رشد نخل کمک کن.':'خرما آماده برداشت است.';
+
+hole.visible=!!state.prepared&&!state.planted;
+
+soilRing.visible=hole.visible;
+
+waterLine.visible=!!state.watered;
+
+refreshPalm();
+
+}
+
+async function perform(action){
+
+if(!serverReady||busy)return;
+
+busy=true;
+
+ui();
+
+try{
+
+const result=await api("/api/action",{action});
+
+applyServerState(result.state);
+
+toast(result.message+" با موفقیت ثبت شد");
+
+}catch(error){
+
+toast(error.message);
+
+console.error(error);
+
+}finally{
+
+busy=false;
+
+ui();
+
+}
+
+}
+
+$('dig').onclick=()=>perform("prepare");
+
+$('plant').onclick=()=>perform("plant");
+
+$('water').onclick=()=>perform("water");
+
+$('fert').onclick=()=>perform("fertilize");
+
+$('harvest').onclick=()=>perform("harvest");
+
+document.querySelectorAll('[data-buy]').forEach(b=>{
+
+b.onclick=()=>perform(b.dataset.buy);
+
+});
+
+$('reset').onclick=()=>{
+
+toast("پیشرفت بازی روی سرور ذخیره می‌شود و از این دکمه پاک نمی‌شود");
+
+};
+
+$('dailyBtn').onclick=()=>{
+
+toast("مأموریت‌ها در مرحله بعد اضافه می‌شوند");
+
+};
+
+login();
+
+</script>
+
+</body>
+
+</html>doctype html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
