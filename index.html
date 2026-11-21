@@ -98,7 +98,47 @@ header{padding:14px 16px 10px;background:#14251bf2;position:sticky;top:0;z-index
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const tg = window.Telegram?.WebApp;
 
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+const initData = tg?.initData || "";
+
+async function loginWithTelegram() {
+  if (!initData) {
+    console.log("Game is not opened inside Telegram");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://nakhlestan-bot.savashreza7.workers.dev/api/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ initData })
+      }
+    );
+
+    const result = await response.json();
+    console.log("Telegram login:", result);
+
+    if (!response.ok) {
+      throw new Error(result.error || "Login failed");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Telegram login error:", error);
+  }
+}
+
+loginWithTelegram();
 const $=id=>document.getElementById(id);
 const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 
