@@ -44,10 +44,14 @@ main{padding:10px 11px 25px}
 .hint{text-align:center;font-size:11px;color:#e9e5d4;padding:6px 8px;background:#ffffff0b;border-radius:10px;margin-top:7px;line-height:1.8}
 .retry-wrap{text-align:center;margin-top:7px}
 .actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
-.act{border:1px solid #ffffff1c;border-radius:12px;background:linear-gradient(145deg,#34563b,#203c2a);color:white;padding:8px 2px;min-height:66px}
-.act span{display:block;font-size:21px}
-.act b{display:block;font-size:10px;margin-top:3px;line-height:1.5}
+.act{position:relative;overflow:hidden;border:1px solid #ffffff1c;border-radius:12px;background:linear-gradient(145deg,#34563b,#203c2a);color:white;padding:8px 2px;min-height:66px}
+.act span{display:block;font-size:21px;position:relative}
+.act b{display:block;font-size:10px;margin-top:3px;line-height:1.5;position:relative}
 .act:disabled,.primary:disabled{opacity:.35;cursor:not-allowed}
+/* نوار پیشرفت روی دکمه در حین انجام هر مرحله */
+.fill{position:absolute;top:0;bottom:0;inset-inline-start:0;width:0;background:#e8c77d55;pointer-events:none}
+.act.working,.primary.working{opacity:1!important}
+.primary{position:relative;overflow:hidden}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:8px}
 .row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px}
 .muted{color:var(--muted);font-size:10px}
@@ -129,10 +133,10 @@ main{padding:10px 11px 25px}
   <div class="retry-wrap"><button id="retry" class="primary hidden">↻ تلاش دوباره</button></div>
 
   <div class="actions">
-    <button class="act" id="dig" disabled><span>🚜</span><b>آماده‌سازی زمین</b></button>
-    <button class="act" id="plant" disabled><span>🌱</span><b>کاشت نهال</b></button>
-    <button class="act" id="water" disabled><span>💧</span><b>آبیاری</b></button>
-    <button class="act" id="fert" disabled><span>🌿</span><b>کوددهی</b></button>
+    <button class="act" id="dig" disabled><i class="fill"></i><span>🚜</span><b>آماده‌سازی زمین</b></button>
+    <button class="act" id="plant" disabled><i class="fill"></i><span>🌱</span><b>کاشت نهال</b></button>
+    <button class="act" id="water" disabled><i class="fill"></i><span>💧</span><b>آبیاری</b></button>
+    <button class="act" id="fert" disabled><i class="fill"></i><span>🌿</span><b>کوددهی</b></button>
   </div>
 
   <div class="panel">
@@ -143,7 +147,7 @@ main{padding:10px 11px 25px}
       <span id="inventory" class="muted">نهال: ۱ · آب: ۳ · کود: ۱</span>
     </div>
     <div style="text-align:center;margin-top:8px">
-      <button id="harvest" class="primary hidden" disabled>🌴 برداشت خرما</button>
+      <button id="harvest" class="primary hidden" disabled><i class="fill"></i><span class="btn-text">🌴 برداشت خرما</span></button>
     </div>
   </div>
 
@@ -246,8 +250,8 @@ let serverReady=false;
 let connecting=false;
 let lastError="";
 let busy=false;
+let taskLabel="";          /* متن مرحله‌ای که در حال انجام است */
 let actionPreview=null;
-let previewTimer=null;
 let toastTimer=null;
 let gameTime=0;
 let lastFrame=0;
@@ -260,6 +264,18 @@ let ctx=canvas?.getContext("2d");
 const bgCanvas=document.createElement("canvas");
 const bgCtx=bgCanvas.getContext("2d");
 let bgReady=false;
+
+/* ========= زمان‌بندی مراحل =========
+   هر مرحله مدت مشخصی طول می‌کشد (میلی‌ثانیه).
+   در این مدت همه دکمه‌ها قفل می‌مانند و فقط بعد از پایان زمان،
+   درخواست به سرور ارسال و دکمه مرحله بعد فعال می‌شود. */
+const TASKS={
+  prepare:  {ms:3000,label:"در حال آماده‌سازی زمین",stage:"dig",       btn:"dig"},
+  plant:    {ms:3000,label:"در حال کاشت نهال",      stage:"plant",     btn:"plant"},
+  water:    {ms:4000,label:"در حال آبیاری نخل",     stage:"water",     btn:"water"},
+  fertilize:{ms:4000,label:"در حال کوددهی نخل",     stage:"fertilizer",btn:"fert"},
+  harvest:  {ms:5000,label:"در حال برداشت خرما",    stage:"harvest",   btn:"harvest"}
+};
 
 /* پیام‌های کوتاه بازی */
 function toast(message){
@@ -392,17 +408,6 @@ function getSceneStage(){
 function showScene(){
   const stage=getSceneStage();
   $("sceneLabel").textContent=titles[stage]||titles.land;
-}
-
-function previewAction(stage){
-  actionPreview=stage;
-  showScene();
-
-  clearTimeout(previewTimer);
-  previewTimer=setTimeout(()=>{
-    actionPreview=null;
-    showScene();
-  },2300);
 }
 
 /* رسم‌های پایه */
@@ -926,7 +931,7 @@ function ui(){
   $("fertCount").textContent=fa(state.fertilizer);
   $("seedCount").textContent=fa(state.seedling);
 
-  /* دکمه‌های مراحل بازی */
+  /* دکمه‌های مراحل بازی (تا پایان مرحله جاری، همه قفل هستند) */
   $("dig").disabled=!serverReady||busy||!!state.prepared||!!state.planted;
 
   $("plant").disabled=
@@ -957,6 +962,7 @@ function ui(){
   $("status").textContent=
     connecting?"در حال اتصال...":
     !serverReady?"خطا در اتصال":
+    busy&&taskLabel?"در حال انجام کار":
     growth>=100&&state.planted?"آماده برداشت":
     state.planted?"نخل در حال رشد":
     state.prepared?"گودال آماده کاشت":
@@ -972,6 +978,7 @@ function ui(){
   $("hint").textContent=
     connecting?"در حال دریافت اطلاعات نخلستان...":
     !serverReady?(lastError||"برای شروع بازی باید اتصال تلگرام برقرار شود."):
+    busy&&taskLabel?taskLabel+"... تا پایان کار صبر کن.":
     !state.prepared&&!state.planted?"برای شروع، زمین را آماده کن.":
     !state.planted?"گودال آماده است؛ نهال مجول را بکار.":
     growth>=100?"خرما آماده برداشت است.":
@@ -983,36 +990,70 @@ function ui(){
   showScene();
 }
 
+/* اجرای تایمر یک مرحله: نوار پیشرفت و شمارش معکوس روی خود دکمه */
+function runTimer(task){
+  return new Promise(resolve=>{
+    const button=$(task.btn);
+    const fill=button.querySelector(".fill");
+    const textEl=button.querySelector("b")||button.querySelector(".btn-text");
+    const oldText=textEl.textContent;
+    const start=Date.now();
+
+    button.classList.add("working");
+
+    const finish=()=>{
+      clearInterval(timer);
+      fill.style.width="0";
+      textEl.textContent=oldText;
+      button.classList.remove("working");
+      resolve();
+    };
+
+    const tick=()=>{
+      const elapsed=Date.now()-start;
+      const left=Math.max(0,Math.ceil((task.ms-elapsed)/1000));
+
+      fill.style.width=Math.min(100,elapsed/task.ms*100)+"%";
+      textEl.textContent=oldText+" ("+fa(left)+")";
+
+      if(elapsed>=task.ms)finish();
+    };
+
+    const timer=setInterval(tick,100);
+    tick();
+  });
+}
+
 /* اجرای عملیات */
 async function perform(action){
   if(!serverReady||busy)return;
 
+  const task=TASKS[action];
+
   busy=true;
-  ui();
 
   try{
+    /* مرحله زمان‌دار: ابتدا صبر می‌کنیم، سپس نتیجه ثبت می‌شود */
+    if(task){
+      taskLabel=task.label;
+      actionPreview=task.stage;
+      ui();
+      await runTimer(task);
+    }else{
+      ui();
+    }
+
     const result=await api("/api/action",{action});
 
     applyServerState(result.state);
-
-    const previews={
-      prepare:"dig",
-      plant:"plant",
-      water:"water",
-      fertilize:"fertilizer",
-      harvest:"harvest"
-    };
-
-    if(previews[action]){
-      previewAction(previews[action]);
-    }
-
     toast(result.message||"عملیات با موفقیت ثبت شد");
   }catch(error){
     toast(error.message);
     console.error("Action error:",error);
   }finally{
     busy=false;
+    taskLabel="";
+    actionPreview=null;
     ui();
   }
 }
