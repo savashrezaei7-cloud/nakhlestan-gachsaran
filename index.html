@@ -2,10 +2,14 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#14251b">
 <title>نخلستان ماهان گچساران</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- بارگذاری غیرمسدودکننده: اگر گوگل‌فونت در دسترس نبود، بازی با Tahoma بدون تأخیر باز می‌شود -->
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 
 <style>
 :root{
@@ -13,14 +17,15 @@
   --gold:#e8c77d;--muted:#b4c4b4;--line:#ffffff18;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:#f4f3e8;font-family:Vazirmatn,Tahoma,sans-serif}
-button{font-family:inherit;cursor:pointer}
+body{margin:0;background:var(--bg);color:#f4f3e8;font-family:Vazirmatn,Tahoma,sans-serif;-webkit-text-size-adjust:100%}
+button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .app{max-width:620px;margin:auto;min-height:100dvh;background:linear-gradient(#17291e,#101c15)}
 header{padding:12px 13px 9px;background:#14251bf7;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);box-shadow:0 5px 18px #0002}
 .brand{font-weight:900;font-size:17px}
 .tag{font-size:10px;color:var(--muted)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}
-.stat{background:#ffffff0b;border:1px solid var(--line);border-radius:11px;padding:5px 3px;text-align:center;color:var(--muted);font-size:9px}
+.stat{background:#ffffff0b;border:1px solid var(--line);border-radius:11px;padding:5px 3px;text-align:center;color:var(--muted);font-size:10px}
 .stat b{display:block;color:white;font-size:16px}
 .topnav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}
 .tab{min-width:0;border:1px solid var(--line);border-radius:12px;background:#ffffff08;color:#c7d1c7;padding:8px 2px 7px;font-size:10px;font-weight:700;line-height:1.7;transition:.2s}
@@ -31,53 +36,54 @@ main{padding:10px 11px 25px}
 .view.active{display:block}
 .farmhead{display:flex;justify-content:space-between;align-items:center;margin:2px 2px 8px}
 .farmhead strong{font-size:14px}
-.farmhead span{font-size:10px;color:var(--muted)}
+.farmhead span{font-size:11px;color:var(--muted)}
 #scene{position:relative;width:100%;height:clamp(210px,34vh,290px);overflow:hidden;border-radius:16px;border:1px solid #ffffff25;background:#8eb4a1;box-shadow:0 7px 20px #0003}
 #gameCanvas{width:100%;height:100%;display:block}
 .scene-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#ffffff08 40%,#0005)}
-.scene-label{position:absolute;bottom:8px;right:9px;padding:5px 10px;border-radius:9px;color:#fff;background:#14251be8;font-size:10px;border:1px solid #ffffff25;pointer-events:none}
-.hint{text-align:center;font-size:10px;color:#e9e5d4;padding:6px 8px;background:#ffffff0b;border-radius:10px;margin-top:7px;line-height:1.8}
+.scene-label{position:absolute;bottom:8px;right:9px;padding:5px 10px;border-radius:9px;color:#fff;background:#14251be8;font-size:11px;border:1px solid #ffffff25;pointer-events:none}
+.hint{text-align:center;font-size:11px;color:#e9e5d4;padding:6px 8px;background:#ffffff0b;border-radius:10px;margin-top:7px;line-height:1.8}
+.retry-wrap{text-align:center;margin-top:7px}
 .actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
 .act{border:1px solid #ffffff1c;border-radius:12px;background:linear-gradient(145deg,#34563b,#203c2a);color:white;padding:8px 2px;min-height:66px}
 .act span{display:block;font-size:21px}
-.act b{display:block;font-size:9px;margin-top:3px}
+.act b{display:block;font-size:10px;margin-top:3px;line-height:1.5}
 .act:disabled,.primary:disabled{opacity:.35;cursor:not-allowed}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:8px}
-.row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:11px}
-.muted{color:var(--muted);font-size:9px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px}
+.muted{color:var(--muted);font-size:10px}
 .bar{height:8px;background:#ffffff17;border-radius:20px;overflow:hidden;margin-top:8px}
 .bar i{height:100%;width:0;display:block;background:linear-gradient(90deg,#80b86b,#e8c77d);transition:width .4s}
-.growth-info{display:flex;justify-content:space-between;align-items:center;margin-top:7px;font-size:10px}
-.primary{background:var(--gold);color:#2a2417;border:0;border-radius:9px;padding:7px 12px;font-weight:800;font-size:10px}
+.growth-info{display:flex;justify-content:space-between;align-items:center;margin-top:7px;font-size:11px}
+.primary{background:var(--gold);color:#2a2417;border:0;border-radius:9px;padding:7px 12px;font-weight:800;font-size:11px}
 .resource-row{display:flex;gap:6px;margin-top:8px}
-.resource{flex:1;min-width:0;text-align:center;padding:7px 2px;background:#ffffff08;border:1px solid var(--line);border-radius:10px;font-size:9px;color:var(--muted)}
+.resource{flex:1;min-width:0;text-align:center;padding:7px 2px;background:#ffffff08;border:1px solid var(--line);border-radius:10px;font-size:10px;color:var(--muted)}
 .resource b{display:block;color:white;font-size:13px;margin-top:2px}
 .section-title{font-size:15px;font-weight:900;margin:4px 2px 10px}
-.section-subtitle{color:var(--muted);font-size:10px;margin:-5px 2px 12px}
+.section-subtitle{color:var(--muted);font-size:11px;margin:-5px 2px 12px}
 .info-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px}
 .info-card h3{font-size:12px;margin:0 0 5px}
-.info-card p{font-size:10px;line-height:2;color:var(--muted);margin:0}
+.info-card p{font-size:11px;line-height:2;color:var(--muted);margin:0}
 .mission{display:flex;align-items:center;gap:10px}
 .mission-icon{width:39px;height:39px;display:grid;place-items:center;flex-shrink:0;background:#ffffff0c;border-radius:12px;font-size:20px}
 .mission-content{flex:1;min-width:0}
-.mission-content b{display:block;font-size:11px}
-.mission-content small{color:var(--muted);font-size:9px}
-.mission-status{font-size:9px;color:var(--gold);white-space:nowrap}
+.mission-content b{display:block;font-size:12px}
+.mission-content small{color:var(--muted);font-size:10px}
+.mission-status{font-size:10px;color:var(--gold);white-space:nowrap}
 .faq-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
-.faq-question{width:100%;border:0;background:transparent;color:#f4f3e8;padding:12px;text-align:right;font-size:11px;font-weight:700}
-.faq-answer{display:none;padding:0 12px 12px;color:var(--muted);font-size:10px;line-height:2}
+.faq-question{width:100%;border:0;background:transparent;color:#f4f3e8;padding:12px;text-align:start;font-size:12px;font-weight:700}
+.faq-answer{display:none;padding:0 12px 12px;color:var(--muted);font-size:11px;line-height:2}
 .faq-item.open .faq-answer{display:block}
-.leader-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 8px;border-bottom:1px solid var(--line);font-size:11px}
+.leader-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 8px;border-bottom:1px solid var(--line);font-size:12px}
 .leader-row:last-child{border-bottom:0}
 .leader-rank{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#ffffff0d;color:var(--gold);font-weight:900}
 .leader-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .leader-score{color:var(--gold);font-weight:800;white-space:nowrap}
-.empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:11px;line-height:2}
-.toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:11px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
+.empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:12px;line-height:2}
+.toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
 .toast.show{opacity:1}
 .hidden{display:none!important}
 @media(max-width:370px){
-  .brand{font-size:15px}.tab{font-size:9px}.act b{font-size:8px}.act{min-height:62px}
+  .brand{font-size:15px}.tab{font-size:9px}.act b{font-size:9px}.act{min-height:62px}
 }
 @media(prefers-reduced-motion:reduce){
   .bar i,.tab{transition:none}
@@ -120,6 +126,7 @@ main{padding:10px 11px 25px}
   </div>
 
   <div class="hint" id="hint">در حال دریافت اطلاعات نخلستان...</div>
+  <div class="retry-wrap"><button id="retry" class="primary hidden">↻ تلاش دوباره</button></div>
 
   <div class="actions">
     <button class="act" id="dig" disabled><span>🚜</span><b>آماده‌سازی زمین</b></button>
@@ -148,9 +155,9 @@ main{padding:10px 11px 25px}
 
   <div class="panel">
     <div class="row"><b>🛒 فروشگاه نخلستان</b><span class="muted">تأمین منابع موردنیاز</span></div>
-    <div class="row" style="margin-top:10px"><span>💧 یک واحد آب — ۱۵ سکه</span><button class="primary" data-buy="buy_water" disabled>خرید</button></div>
-    <div class="row" style="margin-top:9px"><span>🌿 یک واحد کود — ۲۵ سکه</span><button class="primary" data-buy="buy_fertilizer" disabled>خرید</button></div>
-    <div class="row" style="margin-top:9px"><span>🌱 یک نهال مجول — ۴۰ سکه</span><button class="primary" data-buy="buy_seedling" disabled>خرید</button></div>
+    <div class="row" style="margin-top:10px"><span>💧 یک واحد آب — ۱۵ سکه</span><button class="primary" data-buy="buy_water" data-cost="15" disabled>خرید</button></div>
+    <div class="row" style="margin-top:9px"><span>🌿 یک واحد کود — ۲۵ سکه</span><button class="primary" data-buy="buy_fertilizer" data-cost="25" disabled>خرید</button></div>
+    <div class="row" style="margin-top:9px"><span>🌱 یک نهال مجول — ۴۰ سکه</span><button class="primary" data-buy="buy_seedling" data-cost="40" disabled>خرید</button></div>
   </div>
 </section>
 
@@ -171,11 +178,11 @@ main{padding:10px 11px 25px}
   <div class="section-title">💬 پرسش و پاسخ</div>
   <div class="section-subtitle">با مراحل پرورش نخل مجول بیشتر آشنا شو.</div>
 
-  <div class="faq-item"><button class="faq-question">🌱 نخلستان را از کجا شروع کنم؟</button><div class="faq-answer">ابتدا وارد بخش نخلستان شو و زمین را آماده کن. سپس می‌توانی نهال مجول را بکاری.</div></div>
-  <div class="faq-item"><button class="faq-question">🚜 آماده‌سازی زمین چه کاربردی دارد؟</button><div class="faq-answer">آماده‌سازی، مرحله آغازین کاشت است و زمین را برای قرار گرفتن نهال آماده می‌کند.</div></div>
-  <div class="faq-item"><button class="faq-question">💧 چه زمانی باید آبیاری کنم؟</button><div class="faq-answer">پس از کاشت نهال، با استفاده از دکمه آبیاری می‌توانی مرحله آبیاری را انجام دهی.</div></div>
-  <div class="faq-item"><button class="faq-question">🌿 کوددهی چه فایده‌ای دارد؟</button><div class="faq-answer">کوددهی یکی از مراحل مراقبت از نخل است و در روند بازی به‌عنوان یک عملیات جداگانه ثبت می‌شود.</div></div>
-  <div class="faq-item"><button class="faq-question">🌴 چه زمانی می‌توانم خرما برداشت کنم؟</button><div class="faq-answer">وقتی میزان رشد نخل به ۱۰۰ درصد برسد، گزینه برداشت برایت فعال می‌شود.</div></div>
+  <div class="faq-item"><button class="faq-question" aria-expanded="false">🌱 نخلستان را از کجا شروع کنم؟</button><div class="faq-answer">ابتدا وارد بخش نخلستان شو و زمین را آماده کن. سپس می‌توانی نهال مجول را بکاری.</div></div>
+  <div class="faq-item"><button class="faq-question" aria-expanded="false">🚜 آماده‌سازی زمین چه کاربردی دارد؟</button><div class="faq-answer">آماده‌سازی، مرحله آغازین کاشت است و زمین را برای قرار گرفتن نهال آماده می‌کند.</div></div>
+  <div class="faq-item"><button class="faq-question" aria-expanded="false">💧 چه زمانی باید آبیاری کنم؟</button><div class="faq-answer">پس از کاشت نهال، با استفاده از دکمه آبیاری می‌توانی مرحله آبیاری را انجام دهی.</div></div>
+  <div class="faq-item"><button class="faq-question" aria-expanded="false">🌿 کوددهی چه فایده‌ای دارد؟</button><div class="faq-answer">کوددهی یکی از مراحل مراقبت از نخل است و در روند بازی به‌عنوان یک عملیات جداگانه ثبت می‌شود.</div></div>
+  <div class="faq-item"><button class="faq-question" aria-expanded="false">🌴 چه زمانی می‌توانم خرما برداشت کنم؟</button><div class="faq-answer">وقتی میزان رشد نخل به ۱۰۰ درصد برسد، گزینه برداشت برایت فعال می‌شود.</div></div>
 
   <div class="info-card"><h3>🌍 نخلستان ماهان گچساران</h3><p>از خاک گچساران تا سفره جهان؛ تجربه‌ای از کاشت، پرورش و برداشت خرمای مجول در قالب یک بازی آموزشی.</p></div>
 </section>
@@ -190,7 +197,7 @@ main{padding:10px 11px 25px}
 </section>
 </main>
 
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -202,8 +209,15 @@ const WORKER_URL="https://nakhlestan-bot.savashrezaei7.workers.dev";
 const tg=window.Telegram?.WebApp;
 
 if(tg){
-  tg.ready();
-  tg.expand();
+  try{
+    tg.ready();
+    tg.expand();
+    tg.disableVerticalSwipes?.();
+    tg.setHeaderColor?.("#14251b");
+    tg.setBackgroundColor?.("#101b15");
+  }catch(error){
+    console.warn("Telegram WebApp setup:",error);
+  }
 }
 
 const initData=tg?.initData||"";
@@ -229,6 +243,8 @@ const defaults={
 
 let state={...defaults};
 let serverReady=false;
+let connecting=false;
+let lastError="";
 let busy=false;
 let actionPreview=null;
 let previewTimer=null;
@@ -238,7 +254,12 @@ let lastFrame=0;
 let W=0,H=0,DPR=1;
 
 const canvas=$("gameCanvas");
-const ctx=canvas?.getContext("2d");
+let ctx=canvas?.getContext("2d");
+
+/* بوم جداگانه برای پس‌زمینه ثابت (برای سبک‌تر شدن انیمیشن) */
+const bgCanvas=document.createElement("canvas");
+const bgCtx=bgCanvas.getContext("2d");
+let bgReady=false;
 
 /* پیام‌های کوتاه بازی */
 function toast(message){
@@ -302,6 +323,9 @@ async function api(path,data={}){
     if(error.name==="AbortError"){
       throw new Error("زمان اتصال به پایان رسید. دوباره تلاش کن.");
     }
+    if(error instanceof TypeError){
+      throw new Error("اتصال به سرور برقرار نشد. اینترنت خود را بررسی کن.");
+    }
     throw error;
   }finally{
     clearTimeout(timeout);
@@ -316,24 +340,27 @@ function applyServerState(serverState){
 
   state=normalizeState(serverState);
   serverReady=true;
+  lastError="";
   ui();
 }
 
 /* ورود و دریافت اطلاعات بازیکن */
 async function login(){
-  $("status").textContent="در حال اتصال...";
-  $("hint").textContent="در حال دریافت اطلاعات نخلستان...";
+  if(connecting)return;
+
+  connecting=true;
+  lastError="";
+  ui();
 
   try{
     const result=await api("/api/login");
+    connecting=false;
     applyServerState(result.state);
-
-    $("status").textContent="متصل شد";
     toast("به نخلستان ماهان خوش آمدی");
   }catch(error){
     serverReady=false;
-    $("status").textContent="خطا در اتصال";
-    $("hint").textContent=error.message;
+    connecting=false;
+    lastError=error.message;
     ui();
 
     toast(error.message);
@@ -352,12 +379,11 @@ const titles={
   harvest:"برداشت خرما"
 };
 
+/* جلوه‌های آبیاری و کوددهی فقط هنگام انجام عملیات نمایش داده می‌شوند، نه به‌صورت دائمی */
 function getSceneStage(){
   if(actionPreview)return actionPreview;
-  if(state.growth>=100)return "harvest";
+  if(state.growth>=100&&state.planted)return "harvest";
   if(state.planted&&state.growth>0)return "grow";
-  if(state.fertilized)return "fertilizer";
-  if(state.watered)return "water";
   if(state.planted)return "plant";
   if(state.prepared)return "dig";
   return "land";
@@ -418,6 +444,28 @@ function line(x1,y1,x2,y2,color,width=2){
   ctx.stroke();
 }
 
+/* ساخت پس‌زمینه ثابت روی بوم جداگانه */
+function buildBackground(){
+  if(!ctx||!bgCtx||!W||!H)return;
+
+  bgCanvas.width=Math.round(W*DPR);
+  bgCanvas.height=Math.round(H*DPR);
+  bgCtx.setTransform(DPR,0,0,DPR,0,0);
+
+  const mainCtx=ctx;
+  ctx=bgCtx;
+
+  try{
+    drawBackground();
+    bgReady=true;
+  }catch(error){
+    bgReady=false;
+    console.error("Background error:",error);
+  }finally{
+    ctx=mainCtx;
+  }
+}
+
 /* اندازه‌گیری بوم */
 function resizeCanvas(){
   if(!canvas||!ctx)return;
@@ -432,11 +480,13 @@ function resizeCanvas(){
   canvas.width=Math.round(W*DPR);
   canvas.height=Math.round(H*DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
+
+  buildBackground();
 }
 
 window.addEventListener("resize",resizeCanvas);
 
-if("ResizeObserver" in window){
+if("ResizeObserver" in window&&canvas){
   new ResizeObserver(resizeCanvas).observe(canvas);
 }
 
@@ -564,11 +614,10 @@ function drawHole(x,y,scale,progress){
   ctx.restore();
 }
 
-/* ماشین گودزنی */
+/* ماشین گودزنی: هنگام کار در مرکز، در حالت عادی کنار صحنه */
 function drawDigger(t){
   const moving=actionPreview==="dig";
-  const travel=moving?Math.sin(t*5)*13:0;
-  const x=W*.5+travel;
+  const x=moving?W*.5+Math.sin(t*5)*13:W*.27;
   const y=H*.62;
 
   ellipse(x-22,y-2,10,10,"#292d2a");
@@ -613,8 +662,9 @@ function drawPalm(x,y,growth,t){
   ctx.quadraticCurveTo(x-3+sway,y-trunkHeight*.55,x+sway,topY);
   ctx.stroke();
 
-  for(let i=1;i<Math.max(2,amount/12);i++){
-    const yy=y-(trunkHeight*i/Math.max(2,amount/12));
+  const rings=Math.max(2,Math.floor(amount/12));
+  for(let i=1;i<rings;i++){
+    const yy=y-(trunkHeight*i/rings);
     line(x-3,yy,x+3,yy-1,"#c18b55",1);
   }
 
@@ -724,7 +774,7 @@ function drawHarvest(t){
 /* گرد و خاک */
 function drawDust(t){
   for(let i=0;i<10;i++){
-    const x=(i*67+Math.sin(t+i)*8)%W;
+    const x=Math.abs((i*67+Math.sin(t+i)*8))%W;
     const y=H*.64+((i*19)%40);
     ellipse(x,y,1,1,"#fff1c455");
   }
@@ -735,39 +785,47 @@ function drawScene(t){
   if(!ctx||!W||!H)return;
 
   ctx.clearRect(0,0,W,H);
-  drawBackground();
+
+  if(bgReady){
+    ctx.drawImage(bgCanvas,0,0,W,H);
+  }else{
+    drawBackground();
+  }
+
   drawDust(t);
 
   const stage=getSceneStage();
   const centerX=W*.5;
   const groundY=H*.65;
 
-  if(state.prepared||stage==="dig"||stage==="plant"){
+  if(state.prepared||state.planted||stage==="dig"||stage==="plant"||stage==="harvest"){
     drawHole(centerX,groundY,1,1);
   }
 
-  if(state.planted||["plant","water","fertilizer","grow","harvest"].includes(stage)){
-    const growth=state.planted?Math.max(3,state.growth):3;
-    drawPalm(centerX,groundY,growth,t);
+  if(state.planted||stage==="harvest"){
+    const growth=state.planted?Math.max(3,state.growth):(stage==="harvest"?100:3);
 
     if(growth<12){
       drawSeedling(centerX,groundY,t);
+    }else{
+      drawPalm(centerX,groundY,growth,t);
     }
   }
 
-  if(stage==="dig"||(!state.prepared&&!state.planted)){
+  if(stage==="dig"||stage==="land"){
     drawDigger(t);
   }
 
   if(stage==="water")drawWater(t);
   if(stage==="fertilizer")drawFertilizer(t);
 
-  if(stage==="harvest"||state.growth>=100){
+  if(stage==="harvest"){
     drawHarvest(t);
   }
 }
 
-/* انیمیشن دائمی؛ خطای ترسیم باعث توقف حلقه نمی‌شود */
+/* انیمیشن دائمی؛ خطای ترسیم باعث توقف حلقه نمی‌شود.
+   وقتی صفحه پنهان است یا تب نخلستان باز نیست، ترسیم انجام نمی‌شود. */
 function animate(timestamp){
   if(!lastFrame)lastFrame=timestamp;
 
@@ -775,10 +833,14 @@ function animate(timestamp){
   lastFrame=timestamp;
   gameTime+=delta;
 
-  try{
-    drawScene(gameTime);
-  }catch(error){
-    console.error("Canvas drawing error:",error);
+  const farmVisible=$("view-farm").classList.contains("active");
+
+  if(!document.hidden&&farmVisible){
+    try{
+      drawScene(gameTime);
+    }catch(error){
+      console.error("Canvas drawing error:",error);
+    }
   }
 
   requestAnimationFrame(animate);
@@ -801,6 +863,10 @@ function openTab(name){
 
   target.classList.add("active");
 
+  if(name==="farm"){
+    requestAnimationFrame(resizeCanvas);
+  }
+
   if(name==="ranking"){
     loadLeaderboard();
   }
@@ -815,14 +881,16 @@ document.querySelectorAll(".tab").forEach(button=>{
 /* باز و بسته شدن پرسش‌ها */
 document.querySelectorAll(".faq-question").forEach(button=>{
   button.addEventListener("click",()=>{
-    button.parentElement.classList.toggle("open");
+    const item=button.parentElement;
+    item.classList.toggle("open");
+    button.setAttribute("aria-expanded",item.classList.contains("open")?"true":"false");
   });
 });
 
 /* مأموریت‌ها */
 function updateMissions(){
   const items=[
-    ["missionDig",!!state.prepared],
+    ["missionDig",!!state.prepared||!!state.planted],
     ["missionPlant",!!state.planted],
     ["missionWater",!!state.watered],
     ["missionFert",!!state.fertilized],
@@ -840,15 +908,16 @@ function updateMissions(){
 
 /* به‌روزرسانی تمام بخش‌های صفحه */
 function ui(){
-  $("coins").textContent=fa(state.coins);
-  $("score").textContent=fa(state.score);
-  $("level").textContent=fa(state.level);
-  $("trees").textContent=fa(state.trees);
+  $("coins").textContent=fa(Math.round(state.coins));
+  $("score").textContent=fa(Math.round(state.score));
+  $("level").textContent=fa(Math.round(state.level));
+  $("trees").textContent=fa(Math.round(state.trees));
 
   const growth=Math.max(0,Math.min(100,state.growth));
+  const growthShown=Math.floor(growth);
 
   $("growthbar").style.width=growth+"%";
-  $("growth").textContent=fa(growth)+"٪ رشد";
+  $("growth").textContent=fa(growthShown)+"٪ رشد";
 
   $("inventory").textContent=
     `نهال: ${fa(state.seedling)} · آب: ${fa(state.water)} · کود: ${fa(state.fertilizer)}`;
@@ -858,7 +927,7 @@ function ui(){
   $("seedCount").textContent=fa(state.seedling);
 
   /* دکمه‌های مراحل بازی */
-  $("dig").disabled=!serverReady||busy||!!state.prepared;
+  $("dig").disabled=!serverReady||busy||!!state.prepared||!!state.planted;
 
   $("plant").disabled=
     !serverReady||busy||!state.prepared||!!state.planted||state.seedling<1;
@@ -875,29 +944,35 @@ function ui(){
   $("harvest").classList.toggle("hidden",!canHarvest);
   $("harvest").disabled=!serverReady||busy||!canHarvest;
 
-  /* دکمه‌های فروشگاه */
+  /* دکمه‌های فروشگاه: بدون سکه کافی غیرفعال می‌شوند */
   document.querySelectorAll("[data-buy]").forEach(button=>{
-    button.disabled=!serverReady||busy;
+    const cost=Number(button.dataset.cost)||0;
+    button.disabled=!serverReady||busy||state.coins<cost;
   });
+
+  /* دکمه تلاش دوباره */
+  $("retry").classList.toggle("hidden",serverReady||connecting);
 
   /* وضعیت بازیکن */
   $("status").textContent=
-    !serverReady?"در انتظار اتصال":
-    growth>=100?"آماده برداشت":
+    connecting?"در حال اتصال...":
+    !serverReady?"خطا در اتصال":
+    growth>=100&&state.planted?"آماده برداشت":
     state.planted?"نخل در حال رشد":
     state.prepared?"گودال آماده کاشت":
     "زمین آماده کاشت";
 
   $("stage").textContent=
-    growth>=100?"نخل بارده":
+    growth>=100&&state.planted?"نخل بارده":
     state.planted?"نهال مجول":
     state.prepared?"آماده کاشت":
     "زمین آماده نشده";
 
   /* راهنمای مرحله بعد */
   $("hint").textContent=
-    !serverReady?"برای شروع بازی باید اتصال تلگرام برقرار شود.":
-    !state.prepared?"برای شروع، زمین را آماده کن.":
+    connecting?"در حال دریافت اطلاعات نخلستان...":
+    !serverReady?(lastError||"برای شروع بازی باید اتصال تلگرام برقرار شود."):
+    !state.prepared&&!state.planted?"برای شروع، زمین را آماده کن.":
     !state.planted?"گودال آماده است؛ نهال مجول را بکار.":
     growth>=100?"خرما آماده برداشت است.":
     !state.watered?"نهال را آبیاری کن.":
@@ -948,6 +1023,7 @@ $("plant").addEventListener("click",()=>perform("plant"));
 $("water").addEventListener("click",()=>perform("water"));
 $("fert").addEventListener("click",()=>perform("fertilize"));
 $("harvest").addEventListener("click",()=>perform("harvest"));
+$("retry").addEventListener("click",login);
 
 /* اتصال دکمه‌های فروشگاه */
 document.querySelectorAll("[data-buy]").forEach(button=>{
@@ -957,16 +1033,24 @@ document.querySelectorAll("[data-buy]").forEach(button=>{
 });
 
 /* رتبه‌بندی */
-async function loadLeaderboard(){
-  const box=$("leaderboard");
+let leaderboardLoading=false;
 
+async function loadLeaderboard(){
+  if(leaderboardLoading)return;
+  leaderboardLoading=true;
+
+  const box=$("leaderboard");
   box.innerHTML='<div class="empty">در حال دریافت رتبه‌بندی...</div>';
+
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),15000);
 
   try{
     const response=await fetch(WORKER_URL+"/api/leaderboard",{
       method:"GET",
       cache:"no-store",
-      headers:{"Accept":"application/json"}
+      headers:{"Accept":"application/json"},
+      signal:controller.signal
     });
 
     if(!response.ok){
@@ -979,11 +1063,11 @@ async function loadLeaderboard(){
 
     if(Array.isArray(result)){
       players=result;
-    }else if(Array.isArray(result.players)){
+    }else if(Array.isArray(result?.players)){
       players=result.players;
-    }else if(Array.isArray(result.leaderboard)){
+    }else if(Array.isArray(result?.leaderboard)){
       players=result.leaderboard;
-    }else if(Array.isArray(result.data)){
+    }else if(Array.isArray(result?.data)){
       players=result.data;
     }
 
@@ -996,7 +1080,7 @@ async function loadLeaderboard(){
     players=players.map(player=>({
       ...player,
       displayScore:Number(
-        player.score??player.total_score??player.totalScore??0
+        player?.score??player?.total_score??player?.totalScore??0
       )||0
     }));
 
@@ -1023,7 +1107,7 @@ async function loadLeaderboard(){
 
       const score=document.createElement("span");
       score.className="leader-score";
-      score.textContent=fa(player.displayScore)+" امتیاز";
+      score.textContent=fa(Math.round(player.displayScore))+" امتیاز";
 
       row.append(rank,name,score);
       box.appendChild(row);
@@ -1034,6 +1118,9 @@ async function loadLeaderboard(){
       '<div class="empty">فعلاً دریافت رتبه‌بندی ممکن نیست. دوباره تلاش کن.</div>';
 
     console.error("Leaderboard error:",error);
+  }finally{
+    clearTimeout(timeout);
+    leaderboardLoading=false;
   }
 }
 
