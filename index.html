@@ -10,476 +10,123 @@
 
 <style>
 :root{
-  --bg:#101b15;
-  --panel:#1b2d21;
-  --panel2:#243a2a;
-  --gold:#e8c77d;
-  --muted:#b4c4b4;
-  --line:#ffffff18;
-  --green:#6fa878;
+  --bg:#101b15;--panel:#1b2d21;--panel2:#243a2a;
+  --gold:#e8c77d;--muted:#b4c4b4;--line:#ffffff18;
 }
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--bg);
-  color:#f4f3e8;
-  font-family:Vazirmatn,Tahoma,sans-serif;
-}
+body{margin:0;background:var(--bg);color:#f4f3e8;font-family:Vazirmatn,Tahoma,sans-serif}
 button{font-family:inherit;cursor:pointer}
-.app{
-  max-width:620px;
-  margin:auto;
-  min-height:100dvh;
-  background:linear-gradient(#17291e,#101c15);
-}
-header{
-  padding:12px 13px 9px;
-  background:#14251bf7;
-  position:sticky;
-  top:0;
-  z-index:10;
-  border-bottom:1px solid var(--line);
-  box-shadow:0 5px 18px #0002;
-}
-.brand{
-  font-weight:900;
-  font-size:17px;
-}
-.tag{
-  font-size:10px;
-  color:var(--muted);
-}
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-  margin-top:9px;
-}
-.stat{
-  background:#ffffff0b;
-  border:1px solid var(--line);
-  border-radius:11px;
-  padding:5px 3px;
-  text-align:center;
-  color:var(--muted);
-  font-size:9px;
-}
-.stat b{
-  display:block;
-  color:white;
-  font-size:16px;
-}
-.topnav{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-  margin-top:11px;
-}
-.tab{
-  min-width:0;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:#ffffff08;
-  color:#c7d1c7;
-  padding:8px 2px 7px;
-  font-size:10px;
-  font-weight:700;
-  line-height:1.7;
-  transition:.2s;
-}
-.tab .sticker{
-  display:block;
-  font-size:19px;
-  line-height:1.3;
-  margin-bottom:2px;
-}
-.tab.active{
-  color:var(--gold);
-  border-color:#e8c77d80;
-  background:linear-gradient(145deg,#40583b,#263d2b);
-  box-shadow:0 3px 12px #0002;
-}
+.app{max-width:620px;margin:auto;min-height:100dvh;background:linear-gradient(#17291e,#101c15)}
+header{padding:12px 13px 9px;background:#14251bf7;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);box-shadow:0 5px 18px #0002}
+.brand{font-weight:900;font-size:17px}
+.tag{font-size:10px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}
+.stat{background:#ffffff0b;border:1px solid var(--line);border-radius:11px;padding:5px 3px;text-align:center;color:var(--muted);font-size:9px}
+.stat b{display:block;color:white;font-size:16px}
+.topnav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}
+.tab{min-width:0;border:1px solid var(--line);border-radius:12px;background:#ffffff08;color:#c7d1c7;padding:8px 2px 7px;font-size:10px;font-weight:700;line-height:1.7;transition:.2s}
+.tab .sticker{display:block;font-size:19px;line-height:1.3;margin-bottom:2px}
+.tab.active{color:var(--gold);border-color:#e8c77d80;background:linear-gradient(145deg,#40583b,#263d2b);box-shadow:0 3px 12px #0002}
 main{padding:10px 11px 25px}
-.view{display:none}
-.view.active{display:block}
-.farmhead{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin:2px 2px 8px;
-}
-.farmhead strong{font-size:14px}
-.farmhead span{font-size:10px;color:var(--muted)}
-#scene{
-  position:relative;
-  width:100%;
-  height:clamp(175px,29vh,245px);
-  overflow:hidden;
-  border-radius:16px;
-  border:1px solid #ffffff25;
-  background:#8eb4a1;
-  box-shadow:0 7px 20px #0003;
-}
-#sceneImage{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
-  transition:opacity .3s;
-}
-.scene-shade{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:linear-gradient(180deg,transparent 55%,#0005);
-}
-.scene-label{
-  position:absolute;
-  bottom:8px;
-  right:9px;
-  padding:5px 10px;
-  border-radius:9px;
-  color:#fff;
-  background:#14251be8;
-  font-size:10px;
-  border:1px solid #ffffff25;
-}
-.scene-loading{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#203b2b;
-  font-size:12px;
-  font-weight:700;
-  background:#9ab69c;
-}
-.hint{
-  text-align:center;
-  font-size:10px;
-  color:#e9e5d4;
-  padding:6px 8px;
-  background:#ffffff0b;
-  border-radius:10px;
-  margin-top:7px;
-  line-height:1.8;
-}
-.actions{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-  margin-top:8px;
-}
-.act{
-  border:1px solid #ffffff1c;
-  border-radius:12px;
-  background:linear-gradient(145deg,#34563b,#203c2a);
-  color:white;
-  padding:8px 2px;
-  min-height:66px;
-}
-.act span{
-  display:block;
-  font-size:21px;
-}
-.act b{
-  display:block;
-  font-size:9px;
-  margin-top:3px;
-}
+.view{display:none}.view.active{display:block}
+.farmhead{display:flex;justify-content:space-between;align-items:center;margin:2px 2px 8px}
+.farmhead strong{font-size:14px}.farmhead span{font-size:10px;color:var(--muted)}
+#scene{position:relative;width:100%;height:clamp(210px,34vh,290px);overflow:hidden;border-radius:16px;border:1px solid #ffffff25;background:#8eb4a1;box-shadow:0 7px 20px #0003}
+#gameCanvas{width:100%;height:100%;display:block}
+.scene-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#ffffff08 40%,#0005)}
+.scene-label{position:absolute;bottom:8px;right:9px;padding:5px 10px;border-radius:9px;color:#fff;background:#14251be8;font-size:10px;border:1px solid #ffffff25;pointer-events:none}
+.hint{text-align:center;font-size:10px;color:#e9e5d4;padding:6px 8px;background:#ffffff0b;border-radius:10px;margin-top:7px;line-height:1.8}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.act{border:1px solid #ffffff1c;border-radius:12px;background:linear-gradient(145deg,#34563b,#203c2a);color:white;padding:8px 2px;min-height:66px}
+.act span{display:block;font-size:21px}.act b{display:block;font-size:9px;margin-top:3px}
 .act:disabled,.primary:disabled{opacity:.35;cursor:not-allowed}
-.panel{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:10px;
-  margin-top:8px;
-}
-.row{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  align-items:center;
-  font-size:11px;
-}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:8px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:11px}
 .muted{color:var(--muted);font-size:9px}
-.bar{
-  height:8px;
-  background:#ffffff17;
-  border-radius:20px;
-  overflow:hidden;
-  margin-top:8px;
-}
-.bar i{
-  height:100%;
-  width:0;
-  display:block;
-  background:linear-gradient(90deg,#80b86b,#e8c77d);
-  transition:width .4s;
-}
-.growth-info{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:7px;
-  font-size:10px;
-}
-.primary{
-  background:var(--gold);
-  color:#2a2417;
-  border:0;
-  border-radius:9px;
-  padding:7px 12px;
-  font-weight:800;
-  font-size:10px;
-}
-.resource-row{
-  display:flex;
-  gap:6px;
-  margin-top:8px;
-}
-.resource{
-  flex:1;
-  min-width:0;
-  text-align:center;
-  padding:7px 2px;
-  background:#ffffff08;
-  border:1px solid var(--line);
-  border-radius:10px;
-  font-size:9px;
-  color:var(--muted);
-}
-.resource b{
-  display:block;
-  color:white;
-  font-size:13px;
-  margin-top:2px;
-}
-.section-title{
-  font-size:15px;
-  font-weight:900;
-  margin:4px 2px 10px;
-}
-.section-subtitle{
-  color:var(--muted);
-  font-size:10px;
-  margin:-5px 2px 12px;
-}
-.info-card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:9px;
-}
-.info-card h3{
-  font-size:12px;
-  margin:0 0 5px;
-}
-.info-card p{
-  font-size:10px;
-  line-height:2;
-  color:var(--muted);
-  margin:0;
-}
-.mission{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.mission-icon{
-  width:39px;
-  height:39px;
-  display:grid;
-  place-items:center;
-  flex-shrink:0;
-  background:#ffffff0c;
-  border-radius:12px;
-  font-size:20px;
-}
+.bar{height:8px;background:#ffffff17;border-radius:20px;overflow:hidden;margin-top:8px}
+.bar i{height:100%;width:0;display:block;background:linear-gradient(90deg,#80b86b,#e8c77d);transition:width .4s}
+.growth-info{display:flex;justify-content:space-between;align-items:center;margin-top:7px;font-size:10px}
+.primary{background:var(--gold);color:#2a2417;border:0;border-radius:9px;padding:7px 12px;font-weight:800;font-size:10px}
+.resource-row{display:flex;gap:6px;margin-top:8px}
+.resource{flex:1;min-width:0;text-align:center;padding:7px 2px;background:#ffffff08;border:1px solid var(--line);border-radius:10px;font-size:9px;color:var(--muted)}
+.resource b{display:block;color:white;font-size:13px;margin-top:2px}
+.section-title{font-size:15px;font-weight:900;margin:4px 2px 10px}
+.section-subtitle{color:var(--muted);font-size:10px;margin:-5px 2px 12px}
+.info-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px}
+.info-card h3{font-size:12px;margin:0 0 5px}
+.info-card p{font-size:10px;line-height:2;color:var(--muted);margin:0}
+.mission{display:flex;align-items:center;gap:10px}
+.mission-icon{width:39px;height:39px;display:grid;place-items:center;flex-shrink:0;background:#ffffff0c;border-radius:12px;font-size:20px}
 .mission-content{flex:1;min-width:0}
-.mission-content b{
-  display:block;
-  font-size:11px;
-}
-.mission-content small{
-  color:var(--muted);
-  font-size:9px;
-}
-.mission-status{
-  font-size:9px;
-  color:var(--gold);
-  white-space:nowrap;
-}
-.faq-item{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:12px;
-  margin-bottom:8px;
-  overflow:hidden;
-}
-.faq-question{
-  width:100%;
-  border:0;
-  background:transparent;
-  color:#f4f3e8;
-  padding:12px;
-  text-align:right;
-  font-size:11px;
-  font-weight:700;
-}
-.faq-answer{
-  display:none;
-  padding:0 12px 12px;
-  color:var(--muted);
-  font-size:10px;
-  line-height:2;
-}
+.mission-content b{display:block;font-size:11px}
+.mission-content small{color:var(--muted);font-size:9px}
+.mission-status{font-size:9px;color:var(--gold);white-space:nowrap}
+.faq-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.faq-question{width:100%;border:0;background:transparent;color:#f4f3e8;padding:12px;text-align:right;font-size:11px;font-weight:700}
+.faq-answer{display:none;padding:0 12px 12px;color:var(--muted);font-size:10px;line-height:2}
 .faq-item.open .faq-answer{display:block}
-.leader-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  padding:11px 8px;
-  border-bottom:1px solid var(--line);
-  font-size:11px;
-}
+.leader-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 8px;border-bottom:1px solid var(--line);font-size:11px}
 .leader-row:last-child{border-bottom:0}
-.leader-rank{
-  width:27px;
-  height:27px;
-  display:grid;
-  place-items:center;
-  border-radius:9px;
-  background:#ffffff0d;
-  color:var(--gold);
-  font-weight:900;
-}
-.leader-name{flex:1}
-.leader-score{color:var(--gold);font-weight:800}
-.empty{
-  text-align:center;
-  color:var(--muted);
-  padding:22px 8px;
-  font-size:11px;
-  line-height:2;
-}
-.toast{
-  position:fixed;
-  z-index:20;
-  bottom:22px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#263d2b;
-  color:#fff;
-  padding:10px 16px;
-  border-radius:12px;
-  font-size:11px;
-  opacity:0;
-  pointer-events:none;
-  transition:.2s;
-  max-width:90%;
-  text-align:center;
-}
-.toast.show{opacity:1}
-.hidden{display:none!important}
-@media(max-width:370px){
-  .brand{font-size:15px}
-  .tab{font-size:9px}
-  .act b{font-size:8px}
-  .act{min-height:62px}
-}
+.leader-rank{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#ffffff0d;color:var(--gold);font-weight:900}
+.leader-name{flex:1}.leader-score{color:var(--gold);font-weight:800}
+.empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:11px;line-height:2}
+.toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:11px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
+.toast.show{opacity:1}.hidden{display:none!important}
+@media(max-width:370px){.brand{font-size:15px}.tab{font-size:9px}.act b{font-size:8px}.act{min-height:62px}}
+@media(prefers-reduced-motion:reduce){.bar i,.tab{transition:none}}
 </style>
 </head>
 
 <body>
 <div class="app">
-
 <header>
   <div class="brand">🌴 نخلستان ماهان گچساران</div>
   <div class="tag">از خاک گچساران تا سفره جهان</div>
-
   <div class="stats">
     <div class="stat">🪙 سکه<b id="coins">۱۲۰</b></div>
     <div class="stat">⭐ امتیاز<b id="score">۰</b></div>
     <div class="stat">🏅 سطح<b id="level">۱</b></div>
     <div class="stat">🌴 نخل<b id="trees">۰</b></div>
   </div>
-
   <nav class="topnav">
-    <button class="tab active" data-tab="farm">
-      <span class="sticker">🌴</span>
-      نخلستان
-    </button>
-    <button class="tab" data-tab="missions">
-      <span class="sticker">🎯</span>
-      مأموریت‌ها
-    </button>
-    <button class="tab" data-tab="questions">
-      <span class="sticker">💬</span>
-      پرسش و پاسخ
-    </button>
-    <button class="tab" data-tab="ranking">
-      <span class="sticker">🏆</span>
-      رتبه‌بندی
-    </button>
+    <button class="tab active" data-tab="farm"><span class="sticker">🌴</span>نخلستان</button>
+    <button class="tab" data-tab="missions"><span class="sticker">🎯</span>مأموریت‌ها</button>
+    <button class="tab" data-tab="questions"><span class="sticker">💬</span>پرسش و پاسخ</button>
+    <button class="tab" data-tab="ranking"><span class="sticker">🏆</span>رتبه‌بندی</button>
   </nav>
 </header>
 
 <main>
-
-<!-- بخش نخلستان -->
 <section class="view active" id="view-farm">
-
   <div class="farmhead">
     <strong>🌱 نخلستان من</strong>
     <span id="status">در حال بارگذاری...</span>
   </div>
 
   <div id="scene">
-    <div class="scene-loading" id="sceneLoading">
-      در حال آماده‌سازی نخلستان...
-    </div>
-    <img id="sceneImage" alt="مراحل نخلستان">
+    <canvas id="gameCanvas" aria-label="نمای متحرک نخلستان"></canvas>
     <div class="scene-shade"></div>
     <div class="scene-label" id="sceneLabel">زمین نخلستان</div>
   </div>
 
-  <div class="hint" id="hint">
-    در حال دریافت اطلاعات نخلستان...
-  </div>
+  <div class="hint" id="hint">در حال دریافت اطلاعات نخلستان...</div>
 
   <div class="actions">
-    <button class="act" id="dig" disabled>
-      <span>🚜</span><b>آماده‌سازی زمین</b>
-    </button>
-    <button class="act" id="plant" disabled>
-      <span>🌱</span><b>کاشت نهال</b>
-    </button>
-    <button class="act" id="water" disabled>
-      <span>💧</span><b>آبیاری</b>
-    </button>
-    <button class="act" id="fert" disabled>
-      <span>🌿</span><b>کوددهی</b>
-    </button>
+    <button class="act" id="dig" disabled><span>🚜</span><b>آماده‌سازی زمین</b></button>
+    <button class="act" id="plant" disabled><span>🌱</span><b>کاشت نهال</b></button>
+    <button class="act" id="water" disabled><span>💧</span><b>آبیاری</b></button>
+    <button class="act" id="fert" disabled><span>🌿</span><b>کوددهی</b></button>
   </div>
 
   <div class="panel">
-    <div class="row">
-      <b>🌴 وضعیت رشد نخل</b>
-      <span id="stage" class="muted">در حال بارگذاری</span>
-    </div>
+    <div class="row"><b>🌴 وضعیت رشد نخل</b><span id="stage" class="muted">در حال بارگذاری</span></div>
     <div class="bar"><i id="growthbar"></i></div>
     <div class="growth-info">
       <span id="growth">۰٪ رشد</span>
       <span id="inventory" class="muted">نهال: ۱ · آب: ۳ · کود: ۱</span>
     </div>
     <div style="text-align:center;margin-top:8px">
-      <button id="harvest" class="primary hidden" disabled>
-        🌴 برداشت خرما
-      </button>
+      <button id="harvest" class="primary hidden" disabled>🌴 برداشت خرما</button>
     </div>
   </div>
 
@@ -490,177 +137,453 @@ main{padding:10px 11px 25px}
   </div>
 
   <div class="panel">
-    <div class="row">
-      <b>🛒 فروشگاه نخلستان</b>
-      <span class="muted">تأمین منابع موردنیاز</span>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <span>💧 یک واحد آب — ۱۵ سکه</span>
-      <button class="primary" data-buy="buy_water" disabled>خرید</button>
-    </div>
-    <div class="row" style="margin-top:9px">
-      <span>🌿 یک واحد کود — ۲۵ سکه</span>
-      <button class="primary" data-buy="buy_fertilizer" disabled>خرید</button>
-    </div>
-    <div class="row" style="margin-top:9px">
-      <span>🌱 یک نهال مجول — ۴۰ سکه</span>
-      <button class="primary" data-buy="buy_seedling" disabled>خرید</button>
-    </div>
+    <div class="row"><b>🛒 فروشگاه نخلستان</b><span class="muted">تأمین منابع موردنیاز</span></div>
+    <div class="row" style="margin-top:10px"><span>💧 یک واحد آب — ۱۵ سکه</span><button class="primary" data-buy="buy_water" disabled>خرید</button></div>
+    <div class="row" style="margin-top:9px"><span>🌿 یک واحد کود — ۲۵ سکه</span><button class="primary" data-buy="buy_fertilizer" disabled>خرید</button></div>
+    <div class="row" style="margin-top:9px"><span>🌱 یک نهال مجول — ۴۰ سکه</span><button class="primary" data-buy="buy_seedling" disabled>خرید</button></div>
   </div>
 </section>
 
-<!-- بخش مأموریت‌ها -->
 <section class="view" id="view-missions">
   <div class="section-title">🎯 مأموریت‌های نخلستان</div>
   <div class="section-subtitle">با انجام مراحل مختلف، نخلستانت را توسعه بده.</div>
-
-  <div class="info-card mission">
-    <div class="mission-icon">🚜</div>
-    <div class="mission-content">
-      <b>آماده‌سازی زمین</b>
-      <small>زمین را برای کاشت نهال آماده کن.</small>
-    </div>
-    <span class="mission-status" id="missionDig">در انتظار</span>
-  </div>
-
-  <div class="info-card mission">
-    <div class="mission-icon">🌱</div>
-    <div class="mission-content">
-      <b>کاشت نهال مجول</b>
-      <small>اولین نهال نخلستانت را بکار.</small>
-    </div>
-    <span class="mission-status" id="missionPlant">در انتظار</span>
-  </div>
-
-  <div class="info-card mission">
-    <div class="mission-icon">💧</div>
-    <div class="mission-content">
-      <b>آبیاری نخل</b>
-      <small>به نهال خود آب برسان.</small>
-    </div>
-    <span class="mission-status" id="missionWater">در انتظار</span>
-  </div>
-
-  <div class="info-card mission">
-    <div class="mission-icon">🌿</div>
-    <div class="mission-content">
-      <b>کوددهی نخل</b>
-      <small>مواد غذایی موردنیاز نخل را تأمین کن.</small>
-    </div>
-    <span class="mission-status" id="missionFert">در انتظار</span>
-  </div>
-
-  <div class="info-card mission">
-    <div class="mission-icon">🌴</div>
-    <div class="mission-content">
-      <b>برداشت محصول</b>
-      <small>پس از تکمیل رشد، خرما را برداشت کن.</small>
-    </div>
-    <span class="mission-status" id="missionHarvest">در انتظار</span>
-  </div>
-
-  <div class="info-card">
-    <h3>📌 راهنمای مأموریت‌ها</h3>
-    <p>برای انجام هر مأموریت، از بخش «نخلستان» استفاده کن. وضعیت مراحل با اطلاعات بازی به‌روزرسانی می‌شود.</p>
-  </div>
+  <div class="info-card mission"><div class="mission-icon">🚜</div><div class="mission-content"><b>آماده‌سازی زمین</b><small>زمین را برای کاشت نهال آماده کن.</small></div><span class="mission-status" id="missionDig">در انتظار</span></div>
+  <div class="info-card mission"><div class="mission-icon">🌱</div><div class="mission-content"><b>کاشت نهال مجول</b><small>اولین نهال نخلستانت را بکار.</small></div><span class="mission-status" id="missionPlant">در انتظار</span></div>
+  <div class="info-card mission"><div class="mission-icon">💧</div><div class="mission-content"><b>آبیاری نخل</b><small>به نهال خود آب برسان.</small></div><span class="mission-status" id="missionWater">در انتظار</span></div>
+  <div class="info-card mission"><div class="mission-icon">🌿</div><div class="mission-content"><b>کوددهی نخل</b><small>مواد غذایی موردنیاز نخل را تأمین کن.</small></div><span class="mission-status" id="missionFert">در انتظار</span></div>
+  <div class="info-card mission"><div class="mission-icon">🌴</div><div class="mission-content"><b>برداشت محصول</b><small>پس از تکمیل رشد، خرما را برداشت کن.</small></div><span class="mission-status" id="missionHarvest">در انتظار</span></div>
+  <div class="info-card"><h3>📌 راهنمای مأموریت‌ها</h3><p>برای انجام هر مأموریت، از بخش «نخلستان» استفاده کن. وضعیت مراحل با اطلاعات بازی به‌روزرسانی می‌شود.</p></div>
 </section>
 
-<!-- بخش پرسش و پاسخ -->
 <section class="view" id="view-questions">
   <div class="section-title">💬 پرسش و پاسخ</div>
   <div class="section-subtitle">با مراحل پرورش نخل مجول بیشتر آشنا شو.</div>
-
-  <div class="faq-item">
-    <button class="faq-question">🌱 نخلستان را از کجا شروع کنم؟</button>
-    <div class="faq-answer">ابتدا وارد بخش نخلستان شو و زمین را آماده کن. سپس می‌توانی نهال مجول را بکاری.</div>
-  </div>
-
-  <div class="faq-item">
-    <button class="faq-question">🚜 آماده‌سازی زمین چه کاربردی دارد؟</button>
-    <div class="faq-answer">آماده‌سازی، مرحله آغازین کاشت است و زمین را برای قرار گرفتن نهال آماده می‌کند.</div>
-  </div>
-
-  <div class="faq-item">
-    <button class="faq-question">💧 چه زمانی باید آبیاری کنم؟</button>
-    <div class="faq-answer">پس از کاشت نهال، با استفاده از دکمه آبیاری می‌توانی مرحله آبیاری را انجام دهی.</div>
-  </div>
-
-  <div class="faq-item">
-    <button class="faq-question">🌿 کوددهی چه فایده‌ای دارد؟</button>
-    <div class="faq-answer">کوددهی یکی از مراحل مراقبت از نخل است و در روند بازی به‌عنوان یک عملیات جداگانه ثبت می‌شود.</div>
-  </div>
-
-  <div class="faq-item">
-    <button class="faq-question">🌴 چه زمانی می‌توانم خرما برداشت کنم؟</button>
-    <div class="faq-answer">وقتی میزان رشد نخل به ۱۰۰ درصد برسد، گزینه برداشت برایت فعال می‌شود.</div>
-  </div>
-
-  <div class="info-card">
-    <h3>🌍 نخلستان ماهان گچساران</h3>
-    <p>از خاک گچساران تا سفره جهان؛ تجربه‌ای از کاشت، پرورش و برداشت خرمای مجول در قالب یک بازی آموزشی.</p>
-  </div>
+  <div class="faq-item"><button class="faq-question">🌱 نخلستان را از کجا شروع کنم؟</button><div class="faq-answer">ابتدا وارد بخش نخلستان شو و زمین را آماده کن. سپس می‌توانی نهال مجول را بکاری.</div></div>
+  <div class="faq-item"><button class="faq-question">🚜 آماده‌سازی زمین چه کاربردی دارد؟</button><div class="faq-answer">آماده‌سازی، مرحله آغازین کاشت است و زمین را برای قرار گرفتن نهال آماده می‌کند.</div></div>
+  <div class="faq-item"><button class="faq-question">💧 چه زمانی باید آبیاری کنم؟</button><div class="faq-answer">پس از کاشت نهال، با استفاده از دکمه آبیاری می‌توانی مرحله آبیاری را انجام دهی.</div></div>
+  <div class="faq-item"><button class="faq-question">🌿 کوددهی چه فایده‌ای دارد؟</button><div class="faq-answer">کوددهی یکی از مراحل مراقبت از نخل است و در روند بازی به‌عنوان یک عملیات جداگانه ثبت می‌شود.</div></div>
+  <div class="faq-item"><button class="faq-question">🌴 چه زمانی می‌توانم خرما برداشت کنم؟</button><div class="faq-answer">وقتی میزان رشد نخل به ۱۰۰ درصد برسد، گزینه برداشت برایت فعال می‌شود.</div></div>
+  <div class="info-card"><h3>🌍 نخلستان ماهان گچساران</h3><p>از خاک گچساران تا سفره جهان؛ تجربه‌ای از کاشت، پرورش و برداشت خرمای مجول در قالب یک بازی آموزشی.</p></div>
 </section>
 
-<!-- بخش رتبه‌بندی -->
 <section class="view" id="view-ranking">
   <div class="section-title">🏆 رتبه‌بندی بازیکنان</div>
   <div class="section-subtitle">بازیکنان بر اساس امتیاز ثبت‌شده مرتب می‌شوند.</div>
-
-  <div class="info-card" style="padding:4px 10px">
-    <div id="leaderboard">
-      <div class="empty">برای دریافت رتبه‌بندی، کمی صبر کن...</div>
-    </div>
-  </div>
-
-  <button class="primary" id="refreshRanking" style="width:100%;margin-top:5px">
-    ↻ به‌روزرسانی رتبه‌بندی
-  </button>
+  <div class="info-card" style="padding:4px 10px"><div id="leaderboard"><div class="empty">برای دریافت رتبه‌بندی، کمی صبر کن...</div></div></div>
+  <button class="primary" id="refreshRanking" style="width:100%;margin-top:5px">↻ به‌روزرسانی رتبه‌بندی</button>
 </section>
-
 </main>
 <div id="toast" class="toast"></div>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <script>
-const WORKER_URL =
-  "https://nakhlestan-bot.savashrezaei7.workers.dev";
+"use strict";
 
-const tg = window.Telegram?.WebApp;
+const WORKER_URL="https://nakhlestan-bot.savashreza7.workers.dev";
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();}
 
-if(tg){
-  tg.ready();
-  tg.expand();
-}
+const initData=tg?.initData||"";
+const $=id=>document.getElementById(id);
+const fa=n=>String(n).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
 
-const initData = tg?.initData || "";
-const $ = id => document.getElementById(id);
-const fa = n => String(n).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
-
-const defaults = {
+const defaults={
   coins:120,score:0,level:1,trees:0,xp:0,growth:0,
   prepared:0,planted:0,watered:0,fertilized:0,
   seedling:1,water:3,fertilizer:1
 };
 
-let state = {...defaults};
-let serverReady = false;
-let busy = false;
-let actionPreview = null;
-let previewTimer = null;
+let state={...defaults};
+let serverReady=false;
+let busy=false;
+let actionPreview=null;
+let previewTimer=null;
+let visualEffect=null;
+let effectStarted=0;
 
-const images = {
-  land:"stage-land.webp",
-  dig:"stage-dig.webp",
-  plant:"stage-plant.webp",
-  water:"stage-water.webp",
-  fertilizer:"stage-fertilizer.webp",
-  grow:"stage-grow.webp",
-  harvest:"stage-harvest.webp"
-};
+/* -----------------------------
+   موتور گرافیکی و انیمیشن بازی
+------------------------------ */
 
-const titles = {
+const canvas=$("gameCanvas");
+const ctx=canvas.getContext("2d");
+let W=0,H=0,DPR=1;
+let frame=0;
+let lastFrame=0;
+let particles=[];
+let gameTime=0;
+
+function resizeCanvas(){
+  const rect=canvas.getBoundingClientRect();
+  if(!rect.width||!rect.height)return;
+  W=rect.width;
+  H=rect.height;
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.round(W*DPR);
+  canvas.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize",resizeCanvas);
+if("ResizeObserver" in window){
+  new ResizeObserver(resizeCanvas).observe(canvas);
+}
+resizeCanvas();
+
+function roundedRect(x,y,w,h,r,color){
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+
+function ellipse(x,y,rx,ry,color){
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.ellipse(x,y,Math.max(0,rx),Math.max(0,ry),0,0,Math.PI*2);
+  ctx.fill();
+}
+
+function line(x1,y1,x2,y2,color,width=2){
+  ctx.strokeStyle=color;
+  ctx.lineWidth=width;
+  ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+}
+
+function drawBackground(t){
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,"#79b9bd");
+  sky.addColorStop(.65,"#d8c99a");
+  sky.addColorStop(1,"#e7bd7e");
+  ctx.fillStyle=sky;
+  ctx.fillRect(0,0,W,H);
+
+  // خورشید
+  const sunX=W*.78,sunY=H*.2;
+  const glow=ctx.createRadialGradient(sunX,sunY,2,sunX,sunY,42);
+  glow.addColorStop(0,"#fff5bd");
+  glow.addColorStop(1,"#fff5bd00");
+  ctx.fillStyle=glow;
+  ctx.fillRect(sunX-45,sunY-45,90,90);
+  ellipse(sunX,sunY,13,13,"#fff0b0");
+
+  // کوه‌های دوردست
+  ctx.fillStyle="#849b78";
+  ctx.beginPath();
+  ctx.moveTo(0,H*.56);
+  ctx.lineTo(W*.13,H*.31);
+  ctx.lineTo(W*.27,H*.48);
+  ctx.lineTo(W*.43,H*.29);
+  ctx.lineTo(W*.62,H*.52);
+  ctx.lineTo(W*.79,H*.34);
+  ctx.lineTo(W,H*.53);
+  ctx.lineTo(W,H*.72);
+  ctx.lineTo(0,H*.72);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle="#637f62";
+  ctx.beginPath();
+  ctx.moveTo(0,H*.62);
+  ctx.lineTo(W*.2,H*.44);
+  ctx.lineTo(W*.38,H*.61);
+  ctx.lineTo(W*.62,H*.43);
+  ctx.lineTo(W*.82,H*.61);
+  ctx.lineTo(W,H*.47);
+  ctx.lineTo(W,H*.77);
+  ctx.lineTo(0,H*.77);
+  ctx.closePath();
+  ctx.fill();
+
+  // زمین
+  const ground=ctx.createLinearGradient(0,H*.59,0,H);
+  ground.addColorStop(0,"#b88a51");
+  ground.addColorStop(.35,"#98663d");
+  ground.addColorStop(1,"#68452f");
+  ctx.fillStyle=ground;
+  ctx.fillRect(0,H*.61,W,H*.39);
+
+  // ردیف‌های زمین کشاورزی
+  for(let i=0;i<5;i++){
+    const y=H*(.7+i*.065);
+    ctx.strokeStyle=i%2?"#d4a36555":"#573c2b55";
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.quadraticCurveTo(W*.5,y-7,W,y+2);
+    ctx.stroke();
+  }
+
+  // درختان دوردست
+  for(let i=0;i<6;i++){
+    const x=W*(.08+i*.17);
+    const y=H*.61+(i%2)*5;
+    drawSmallPalm(x,y,.32);
+  }
+
+  // بوته‌های کوچک
+  for(let i=0;i<13;i++){
+    const x=(i*73+19)%W;
+    const y=H*(.68+(i%4)*.065);
+    ellipse(x,y,5,2,"#54703d");
+    ellipse(x+4,y-2,4,2,"#6f8848");
+  }
+}
+
+function drawSmallPalm(x,y,scale){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  line(0,0,-2,-35,"#765137",5);
+  for(let i=0;i<5;i++){
+    const a=(-Math.PI*.95)+(i*Math.PI*.9/4);
+    const ex=Math.cos(a)*24;
+    const ey=-35+Math.sin(a)*15;
+    line(-2,-35,ex,ey,"#386c42",3);
+    for(let j=1;j<5;j++){
+      const px=-2+(ex+2)*j/5;
+      const py=-35+(ey+35)*j/5;
+      line(px,py,px+Math.cos(a+1)*4,py+5,"#5b8a4d",1.2);
+    }
+  }
+  ctx.restore();
+}
+
+function drawHole(x,y,scale,progress){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  const depth=Math.max(0,progress);
+  ellipse(0,0,37,10,"#5c3927");
+  ellipse(0,-1,29,6,"#3c2b20");
+  if(depth>0){
+    ellipse(0,-2,23,Math.max(2,depth*8), "#39291e");
+    ellipse(-29,-3,11,5,"#b9854e");
+    ellipse(29,-3,12,5,"#c3945c");
+  }
+  ctx.restore();
+}
+
+function drawDigger(t){
+  const moving=actionPreview==="dig";
+  const travel=moving?Math.sin(t*5)*13:0;
+  const x=W*.5+travel;
+  const y=H*.62;
+
+  // چرخ‌ها
+  ellipse(x-22,y-2,10,10,"#292d2a");
+  ellipse(x+18,y-2,10,10,"#292d2a");
+  ellipse(x-22,y-2,4,4,"#9a9a83");
+  ellipse(x+18,y-2,4,4,"#9a9a83");
+
+  // بدنه ماشین
+  roundedRect(x-31,y-22,60,20,5,"#e0a52f");
+  roundedRect(x-12,y-39,24,20,5,"#e9b83d");
+  roundedRect(x-8,y-35,15,12,3,"#6b9c9c");
+
+  // بازوی بیل مکانیکی
+  const armSwing=moving?Math.sin(t*6)*9:0;
+  line(x+20,y-25,x+39,y-51+armSwing,"#d99b2d",7);
+  line(x+39,y-51+armSwing,x+51,y-26+armSwing,"#d99b2d",6);
+  line(x+51,y-26+armSwing,x+57,y-19+armSwing,"#333a31",5);
+
+  if(moving){
+    for(let i=0;i<3;i++){
+      const px=x+48+(Math.random()-.5)*24;
+      const py=y-13+Math.random()*8;
+      ellipse(px,py,2,2,"#d9ad70");
+    }
+  }
+}
+
+function drawPalm(x,y,growth,t){
+  const scale=.28+(.72*Math.max(0,Math.min(100,growth))/100);
+  const trunkHeight=12+growth*.72;
+  const topY=y-trunkHeight;
+  const sway=Math.sin(t*1.2)*2.3;
+
+  // سایه
+  ellipse(x,y+2,25+scale*12,5,"#3d2a1d55");
+
+  // تنه
+  ctx.strokeStyle="#8a5a35";
+  ctx.lineWidth=5+scale*5;
+  ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.quadraticCurveTo(x-3+sway,y-trunkHeight*.55,x+sway,topY);
+  ctx.stroke();
+
+  // حلقه‌های تنه
+  for(let i=1;i<Math.max(2,growth/12);i++){
+    const yy=y-(trunkHeight*i/Math.max(2,growth/12));
+    line(x-3,yy,x+3,yy-1,"#c18b55",1);
+  }
+
+  // برگ‌ها
+  const leafLength=15+scale*23;
+  for(let i=0;i<8;i++){
+    const angle=(-Math.PI*.95)+(i*Math.PI*1.9/7);
+    const endX=x+sway+Math.cos(angle)*leafLength;
+    const endY=topY+Math.sin(angle)*leafLength*.58-5;
+    ctx.strokeStyle=i%2?"#3e783f":"#518d47";
+    ctx.lineWidth=3+scale*2;
+    ctx.beginPath();
+    ctx.moveTo(x+sway,topY);
+    ctx.quadraticCurveTo(x+sway+Math.cos(angle)*leafLength*.5,topY-13,endX,endY);
+    ctx.stroke();
+
+    for(let j=1;j<=5;j++){
+      const p=j/6;
+      const px=x+sway+(endX-x-sway)*p;
+      const py=topY+(endY-topY)*p-3;
+      const side=(j%2?1:-1);
+      line(px,py,px+side*5,py+4,"#78a653",1.5);
+    }
+  }
+
+  // خوشه‌های خرما
+  if(growth>=65){
+    for(let i=0;i<4;i++){
+      const bx=x+sway+(i-1.5)*5;
+      const by=topY+13+(i%2)*5;
+      for(let j=0;j<4;j++){
+        ellipse(bx+(j%2)*4,by+j*3,2.2,3.1,
+          growth>=90?"#a84c28":"#b98a3c");
+      }
+    }
+  }
+}
+
+function drawSeedling(x,y,t){
+  const bounce=Math.sin(t*2)*1.5;
+  line(x,y,x,y-18-bounce,"#6e4c2d",3);
+  line(x,y-12-bounce,x-10,y-22-bounce,"#438044",3);
+  line(x,y-12-bounce,x+10,y-24-bounce,"#4f9148",3);
+  line(x,y-17-bounce,x,y-29-bounce,"#5a9b4e",3);
+  ellipse(x,y,5,2,"#b98b53");
+}
+
+function drawWater(t){
+  for(let i=0;i<18;i++){
+    const phase=(t*1.3+i*.17)%1;
+    const x=W*.5+Math.sin(i*2.1)*28;
+    const y=H*.25+phase*H*.34;
+    ellipse(x,y,1.5,3,"#c5efff");
+  }
+  const ripple=(t*22)%34;
+  ctx.strokeStyle="#9ed9db99";
+  ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.ellipse(W*.5,H*.63,ripple+5,Math.max(2,ripple*.2),0,0,Math.PI*2);
+  ctx.stroke();
+}
+
+function drawFertilizer(t){
+  for(let i=0;i<24;i++){
+    const phase=(t*.7+i*.11)%1;
+    const x=W*.5+Math.sin(i*3+t)*phase*45;
+    const y=H*.6-phase*40;
+    ellipse(x,y,2,2,"#d5bd66");
+  }
+}
+
+function drawHarvest(t){
+  const x=W*.75,y=H*.58;
+  // سبد
+  ctx.fillStyle="#b7793e";
+  ctx.beginPath();
+  ctx.moveTo(x-19,y-1);
+  ctx.lineTo(x+19,y-1);
+  ctx.lineTo(x+13,y+15);
+  ctx.lineTo(x-13,y+15);
+  ctx.closePath();
+  ctx.fill();
+  line(x-19,y-1,x+19,y-1,"#e1ad66",3);
+  for(let i=0;i<9;i++){
+    ellipse(x-12+(i%3)*10,y-7-Math.sin(t*3+i)*2,3,4,"#9b4828");
+  }
+  const sparkle=(Math.sin(t*5)+1)/2;
+  ellipse(x+26,y-24,2+sparkle*2,2+sparkle*2,"#ffe7a0");
+}
+
+function drawDust(t){
+  for(let i=0;i<10;i++){
+    const x=(i*67+Math.sin(t+i)*8)%W;
+    const y=H*.64+((i*19)%40);
+    ellipse(x,y,1,1,"#fff1c455");
+  }
+}
+
+function drawScene(t){
+  if(!W||!H)return;
+  ctx.clearRect(0,0,W,H);
+  drawBackground(t);
+  drawDust(t);
+
+  const stage=actionPreview||getSceneStage();
+  const centerX=W*.5;
+  const groundY=H*.65;
+
+  // گودال
+  if(state.prepared||stage==="dig"||stage==="plant"){
+    drawHole(centerX,groundY,1,state.prepared?1:.7);
+  }
+
+  // نخل یا نهال
+  if(state.planted||["plant","water","fertilizer","grow","harvest"].includes(stage)){
+    const growth=state.planted?Math.max(3,state.growth):3;
+    drawPalm(centerX,groundY,growth,t);
+    if(growth<12)drawSeedling(centerX,groundY,t);
+  }
+
+  // ماشین در زمان عملیات گودزنی
+  if(stage==="dig"||(!state.prepared&&!state.planted)){
+    drawDigger(t);
+  }
+
+  if(stage==="water")drawWater(t);
+  if(stage==="fertilizer")drawFertilizer(t);
+  if(stage==="harvest"||state.growth>=100)drawHarvest(t);
+
+  // نور و ذرات کوچک زمان عملیات
+  if(visualEffect){
+    const elapsed=(performance.now()-effectStarted)/1000;
+    if(elapsed>2.4){visualEffect=null;}
+  }
+}
+
+function animate(timestamp){
+  if(!lastFrame)lastFrame=timestamp;
+  const delta=Math.min((timestamp-lastFrame)/1000,.05);
+  lastFrame=timestamp;
+  gameTime+=delta;
+  frame++;
+  drawScene(gameTime);
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+/* -----------------------------
+   اتصال به سرور و منطق بازی
+------------------------------ */
+
+function getSceneStage(){
+  if(actionPreview)return actionPreview;
+  if(state.growth>=100)return "harvest";
+  if(state.growth>0)return "grow";
+  if(state.fertilized)return "fertilizer";
+  if(state.watered)return "water";
+  if(state.planted)return "plant";
+  if(state.prepared)return "dig";
+  return "land";
+}
+
+const titles={
   land:"زمین نخلستان",
   dig:"آماده‌سازی و گودزنی",
   plant:"کاشت نهال مجول",
@@ -670,32 +593,38 @@ const titles = {
   harvest:"برداشت خرما"
 };
 
-/* جابه‌جایی بین چهار پنل بالایی */
+function showScene(){
+  const stage=getSceneStage();
+  $("sceneLabel").textContent=titles[stage]||titles.land;
+}
+
+function previewAction(stage){
+  actionPreview=stage;
+  visualEffect=stage;
+  effectStarted=performance.now();
+  if(previewTimer)clearTimeout(previewTimer);
+  showScene();
+  previewTimer=setTimeout(()=>{
+    actionPreview=null;
+    showScene();
+  },2400);
+}
+
 function openTab(name){
   document.querySelectorAll(".tab").forEach(button=>{
     button.classList.toggle("active",button.dataset.tab===name);
   });
-
-  document.querySelectorAll(".view").forEach(view=>{
-    view.classList.remove("active");
-  });
-
+  document.querySelectorAll(".view").forEach(view=>view.classList.remove("active"));
   $("view-"+name).classList.add("active");
-
-  if(name==="ranking") loadLeaderboard();
+  if(name==="ranking")loadLeaderboard();
 }
 
 document.querySelectorAll(".tab").forEach(button=>{
-  button.addEventListener("click",()=>{
-    openTab(button.dataset.tab);
-  });
+  button.addEventListener("click",()=>openTab(button.dataset.tab));
 });
 
-/* پرسش و پاسخ باز و بسته‌شونده */
 document.querySelectorAll(".faq-question").forEach(button=>{
-  button.addEventListener("click",()=>{
-    button.parentElement.classList.toggle("open");
-  });
+  button.addEventListener("click",()=>button.parentElement.classList.toggle("open"));
 });
 
 function toast(message){
@@ -713,31 +642,23 @@ function normalizeState(s){
 }
 
 function applyServerState(s){
-  if(!s || typeof s!=="object"){
-    throw new Error("اطلاعات بازی از سرور دریافت نشد");
-  }
+  if(!s||typeof s!=="object")throw new Error("اطلاعات بازی از سرور دریافت نشد");
   state=normalizeState(s);
   serverReady=true;
   ui();
 }
 
 async function api(path,data={}){
-  if(!initData) throw new Error("بازی را از داخل ربات تلگرام باز کنید");
-
+  if(!initData)throw new Error("بازی را از داخل ربات تلگرام باز کنید");
   const response=await fetch(WORKER_URL+path,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({initData,...data})
   });
-
   let result;
-  try{
-    result=await response.json();
-  }catch{
-    throw new Error("پاسخ سرور قابل خواندن نیست");
-  }
-
-  if(!response.ok || !result.success){
+  try{result=await response.json();}
+  catch{throw new Error("پاسخ سرور قابل خواندن نیست");}
+  if(!response.ok||!result.success){
     throw new Error(result.error||"ارتباط با سرور برقرار نشد");
   }
   return result;
@@ -760,57 +681,6 @@ async function login(){
   }
 }
 
-/* انتخاب تصویر متناسب با وضعیت بازی */
-function getSceneStage(){
-  if(actionPreview) return actionPreview;
-  if(state.growth>=100) return "harvest";
-  if(state.growth>0) return "grow";
-  if(state.fertilized) return "fertilizer";
-  if(state.watered) return "water";
-  if(state.planted) return "plant";
-  if(state.prepared) return "dig";
-  return "land";
-}
-
-function showScene(){
-  const stage=getSceneStage();
-  const path=images[stage];
-
-  $("sceneLabel").textContent=titles[stage];
-
-  if($("sceneImage").dataset.stage===stage) return;
-
-  const image=new Image();
-  $("sceneImage").dataset.stage=stage;
-  $("sceneImage").style.opacity="0";
-
-  image.onload=()=>{
-    $("sceneImage").src=path;
-    $("sceneImage").style.opacity="1";
-    $("sceneLoading").classList.add("hidden");
-  };
-
-  image.onerror=()=>{
-    $("sceneLoading").textContent="تصویر پیدا نشد: "+path;
-    $("sceneLoading").classList.remove("hidden");
-    $("sceneImage").style.opacity="0";
-  };
-
-  image.src=path;
-}
-
-function previewAction(stage){
-  actionPreview=stage;
-  if(previewTimer) clearTimeout(previewTimer);
-  showScene();
-
-  previewTimer=setTimeout(()=>{
-    actionPreview=null;
-    showScene();
-  },2200);
-}
-
-/* مأموریت‌ها */
 function updateMissions(){
   const items=[
     ["missionDig",state.prepared],
@@ -819,14 +689,12 @@ function updateMissions(){
     ["missionFert",state.fertilized],
     ["missionHarvest",state.growth>=100]
   ];
-
   items.forEach(([id,done])=>{
     $(id).textContent=done?"✓ انجام شد":"در انتظار";
     $(id).style.color=done?"#8ed69b":"#e8c77d";
   });
 }
 
-/* رابط کاربری نخلستان */
 function ui(){
   $("coins").textContent=fa(state.coins);
   $("score").textContent=fa(state.score);
@@ -876,10 +744,8 @@ function ui(){
   showScene();
 }
 
-/* عملیات بازی */
 async function perform(action){
-  if(!serverReady||busy) return;
-
+  if(!serverReady||busy)return;
   busy=true;
   ui();
 
@@ -894,8 +760,7 @@ async function perform(action){
       fertilize:"fertilizer",
       harvest:"harvest"
     };
-
-    if(previews[action]) previewAction(previews[action]);
+    if(previews[action])previewAction(previews[action]);
 
     toast((result.message||"عملیات")+" با موفقیت ثبت شد");
   }catch(error){
@@ -917,18 +782,16 @@ document.querySelectorAll("[data-buy]").forEach(button=>{
   button.onclick=()=>perform(button.dataset.buy);
 });
 
-/* دریافت رتبه‌بندی از سرور */
 async function loadLeaderboard(){
   const box=$("leaderboard");
   box.innerHTML='<div class="empty">در حال دریافت رتبه‌بندی...</div>';
 
   try{
     const response=await fetch(WORKER_URL+"/api/leaderboard");
-    if(!response.ok) throw new Error("دریافت رتبه‌بندی ناموفق بود");
+    if(!response.ok)throw new Error("دریافت رتبه‌بندی ناموفق بود");
 
     const result=await response.json();
-    const players=Array.isArray(result)?result:
-      (result.players||result.leaderboard||[]);
+    const players=Array.isArray(result)?result:(result.players||result.leaderboard||[]);
 
     if(!players.length){
       box.innerHTML='<div class="empty">هنوز اطلاعاتی برای نمایش وجود ندارد.</div>';
@@ -936,7 +799,6 @@ async function loadLeaderboard(){
     }
 
     box.innerHTML="";
-
     players.slice(0,50).forEach((player,index)=>{
       const row=document.createElement("div");
       row.className="leader-row";
@@ -964,7 +826,7 @@ async function loadLeaderboard(){
 
 $("refreshRanking").onclick=loadLeaderboard;
 
-/* شروع بازی */
+/* آغاز بازی */
 ui();
 login();
 </script>
