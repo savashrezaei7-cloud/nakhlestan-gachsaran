@@ -269,7 +269,7 @@ function setupTelegram(){
     }
   }
 
-  initData=tg?.initData||readInitDataFromUrl();
+  initData=tg?.initData||initData||readInitDataFromUrl();
 }
 const $=id=>document.getElementById(id);
 
@@ -351,48 +351,75 @@ function normalizeState(source){
   return result;
 }
 
+/* آدرس‌های سرور. اگر آدرس workers.dev در شبکه کاربر فیلتر بود،
+   یک دامنه شخصی (که به همان Worker وصل شده) را به این فهرست اضافه کن، مثلاً:
+   const API_BASES=[WORKER_URL,"https://api.your-domain.com"];
+   بازی خودش اولین آدرسی را که جواب بدهد به خاطر می‌سپارد. */
+const API_BASES=[WORKER_URL];
+let apiBase=0;
+
+/* ارسال درخواست با امتحان کردن آدرس‌های جایگزین.
+   tryAll=true فقط برای درخواست‌های بی‌خطر (ورود و رتبه‌بندی) است؛
+   برای عملیات بازی بعد از timeout درخواست تکرار نمی‌شود تا دوبار ثبت نشود. */
+async function request(path,options,timeoutMs,tryAll){
+  let lastError=null;
+
+  for(let i=0;i<API_BASES.length;i++){
+    const index=(apiBase+i)%API_BASES.length;
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),timeoutMs);
+
+    try{
+      const response=await fetch(API_BASES[index]+path,{
+        ...options,
+        signal:controller.signal,
+        cache:"no-store"
+      });
+
+      apiBase=index;
+      return response;
+    }catch(error){
+      lastError=error;
+      if(error.name==="AbortError"&&!tryAll)break;
+    }finally{
+      clearTimeout(timeout);
+    }
+  }
+
+  const failure=new Error(
+    lastError?.name==="AbortError"
+      ?"زمان اتصال به پایان رسید. دوباره تلاش کن."
+      :"اتصال به سرور برقرار نشد. اینترنت خود را بررسی کن."
+  );
+  failure.network=true;
+  throw failure;
+}
+
 /* دریافت اطلاعات از Worker */
-async function api(path,data={}){
+async function api(path,data={},safe=false){
   if(!initData){
     throw new Error("بازی را از داخل ربات تلگرام باز کنید.");
   }
 
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),15000);
+  const response=await request(path,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({initData,...data})
+  },15000,safe);
+
+  let result;
 
   try{
-    const response=await fetch(WORKER_URL+path,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({initData,...data}),
-      signal:controller.signal,
-      cache:"no-store"
-    });
-
-    let result;
-
-    try{
-      result=await response.json();
-    }catch{
-      throw new Error("پاسخ سرور قابل خواندن نیست.");
-    }
-
-    if(!response.ok||!result.success){
-      throw new Error(result?.error||"ارتباط با سرور برقرار نشد.");
-    }
-
-    return result;
-  }catch(error){
-    if(error.name==="AbortError"){
-      throw new Error("زمان اتصال به پایان رسید. دوباره تلاش کن.");
-    }
-    if(error instanceof TypeError){
-      throw new Error("اتصال به سرور برقرار نشد. اینترنت خود را بررسی کن.");
-    }
-    throw error;
-  }finally{
-    clearTimeout(timeout);
+    result=await response.json();
+  }catch{
+    throw new Error("پاسخ سرور قابل خواندن نیست.");
   }
+
+  if(!response.ok||!result.success){
+    throw new Error(result?.error||"ارتباط با سرور برقرار نشد.");
+  }
+
+  return result;
 }
 
 /* اعمال وضعیت دریافتی از سرور */
@@ -416,7 +443,24 @@ async function login(){
   ui();
 
   try{
-    const result=await api("/api/login");
+    let result=null;
+    let attempt=0;
+
+    /* اگر اینترنت یا پروکسی ناپایدار بود، چند بار خودکار دوباره تلاش می‌کند */
+    while(true){
+      try{
+        result=await api("/api/login",{},true);
+        break;
+      }catch(error){
+        if(error.network&&attempt<2){
+          attempt++;
+          await new Promise(resolve=>setTimeout(resolve,1500));
+          continue;
+        }
+        throw error;
+      }
+    }
+
     connecting=false;
     applyServerState(result.state);
     toast("به نخلستان ماهان خوش آمدی");
@@ -1184,16 +1228,11 @@ async function loadLeaderboard(){
   const box=$("leaderboard");
   box.innerHTML='<div class="empty">در حال دریافت رتبه‌بندی...</div>';
 
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),15000);
-
   try{
-    const response=await fetch(WORKER_URL+"/api/leaderboard",{
+    const response=await request("/api/leaderboard",{
       method:"GET",
-      cache:"no-store",
-      headers:{"Accept":"application/json"},
-      signal:controller.signal
-    });
+      headers:{"Accept":"application/json"}
+    },15000,true);
 
     if(!response.ok){
       throw new Error("دریافت رتبه‌بندی ناموفق بود.");
@@ -1261,7 +1300,6 @@ async function loadLeaderboard(){
 
     console.error("Leaderboard error:",error);
   }finally{
-    clearTimeout(timeout);
     leaderboardLoading=false;
   }
 }
@@ -1272,12 +1310,32 @@ $("refreshRanking").addEventListener("click",loadLeaderboard);
 ui();
 
 (async function start(){
-  await loadTelegramScript();
+  /* اگر تلگرام اطلاعات ورود را در آدرس داده باشد، منتظر اسکریپت تلگرام نمی‌مانیم */
+  initData=readInitDataFromUrl();
+
+  const scriptPromise=loadTelegramScript();
+  if(!initData)await scriptPromise;
+
   setupTelegram();
   booting=false;
   ui();
   login();
+
+  scriptPromise.then(()=>{
+    setupTelegram();
+    if(!serverReady&&!connecting&&initData)login();
+  });
 })();
+
+/* وقتی اینترنت برگشت یا کاربر دوباره به بازی برگشت، اگر وصل نیستیم دوباره تلاش کن */
+function retryIfOffline(){
+  if(!booting&&!serverReady&&!connecting&&initData)login();
+}
+
+window.addEventListener("online",retryIfOffline);
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden)retryIfOffline();
+});
 
 </script>
 </body>
