@@ -86,10 +86,28 @@ main{padding:10px 11px 25px}
 .toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
 .toast.show{opacity:1}
 .btn-text{position:relative}
+.coin{vertical-align:-2px;margin-inline-end:2px}
 .needs{display:none;margin-top:7px;padding:8px 10px;border-radius:10px;background:#7a2e2e55;border:1px solid #e0786a88;color:#ffd9d2;font-size:11px;line-height:1.9;text-align:center}
 .needs.show{display:block}
 .primary.pulse{outline:2px solid #ff8a7a;outline-offset:2px}
 main{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}
+.topnav.has-admin{grid-template-columns:repeat(5,1fr)}
+.admin-search,.admin-text{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#ffffff0b;color:#fff;font:inherit;font-size:12px}
+.admin-search{margin-bottom:8px}
+.admin-text{min-height:90px;resize:vertical;line-height:1.9}
+.admin-row{display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:12px;cursor:pointer}
+.admin-row:last-child{border-bottom:0}
+.admin-row .who{flex:1;min-width:0}
+.admin-row .who b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-row .who small{color:var(--muted);font-size:10px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:11px}
+.kv:last-child{border-bottom:0}
+.kv span:first-child{color:var(--muted);white-space:nowrap}
+.kv span:last-child{unicode-bidi:plaintext;text-align:end;word-break:break-all}
+.log-line{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--line)}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+.btn-row .primary{flex:1;padding:9px 12px}
+.primary.ghost{background:#ffffff14;color:#f4f3e8;border:1px solid var(--line)}
 .hidden{display:none!important}
 @media(max-width:370px){
   .brand{font-size:15px}.tab{font-size:9px}.act b{font-size:9px}.act{min-height:62px}
@@ -105,9 +123,10 @@ main{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}
 <header>
   <div class="brand">🌴 نخلستان ماهان گچساران</div>
   <div class="tag">از خاک گچساران تا سفره جهان</div>
+  <div class="tag" id="buildInfo">نسخهٔ ۳ · در حال اتصال...</div>
 
   <div class="stats">
-    <div class="stat">🪙 سکه<b id="coins">۱۲۰</b></div>
+    <div class="stat"><svg class="coin" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#e8c77d" stroke="#b8902f" stroke-width="2"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#b8902f" stroke-width="1.6"/></svg> سکه<b id="coins">۱۲۰</b></div>
     <div class="stat">⭐ امتیاز<b id="score">۰</b></div>
     <div class="stat">🏅 سطح<b id="level">۱</b></div>
     <div class="stat">🌴 نخل<b id="trees">۰</b></div>
@@ -118,6 +137,7 @@ main{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}
     <button class="tab" data-tab="missions"><span class="sticker">🎯</span>مأموریت‌ها</button>
     <button class="tab" data-tab="questions"><span class="sticker">💬</span>پرسش و پاسخ</button>
     <button class="tab" data-tab="ranking"><span class="sticker">🏆</span>رتبه‌بندی</button>
+    <button class="tab hidden" id="adminTab" data-tab="admin"><span class="sticker">🛠️</span>مدیریت</button>
   </nav>
 </header>
 
@@ -204,6 +224,37 @@ main{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}
     <div id="leaderboard"><div class="empty">برای دریافت رتبه‌بندی، کمی صبر کن...</div></div>
   </div>
   <button class="primary" id="refreshRanking" style="width:100%;margin-top:5px">↻ به‌روزرسانی رتبه‌بندی</button>
+</section>
+
+<section class="view" id="view-admin">
+  <div class="section-title">🛠️ پنل مدیریت</div>
+  <div class="section-subtitle" id="adminSummary">در حال دریافت فهرست بازیکنان...</div>
+
+  <div id="adminListWrap">
+    <input class="admin-search" id="adminSearch" type="search" placeholder="جستجوی نام، نام‌کاربری یا شناسه">
+    <div class="info-card" style="padding:4px 10px"><div id="adminList"></div></div>
+    <button class="primary" id="adminRefresh" style="width:100%;margin-top:5px">↻ به‌روزرسانی فهرست</button>
+  </div>
+
+  <div id="adminDetail" class="hidden">
+    <button class="primary ghost" id="adminBack" style="margin-bottom:8px">→ بازگشت به فهرست</button>
+
+    <div class="info-card">
+      <h3 id="adminDetailTitle">بازیکن</h3>
+      <div id="adminDetailInfo"></div>
+      <div class="btn-row"><button class="primary ghost hidden" id="adminOpenChat">💬 باز کردن گفتگو در تلگرام</button></div>
+    </div>
+
+    <div class="info-card">
+      <h3>✉️ ارسال پیام از طرف ربات</h3>
+      <textarea class="admin-text" id="adminText" maxlength="4000" placeholder="متن پیام را بنویس..."></textarea>
+      <div class="btn-row"><button class="primary" id="adminSend">ارسال پیام</button></div>
+      <p style="margin-top:8px">پیام فقط به بازیکنی می‌رسد که ربات را استارت کرده و آن را بلاک نکرده باشد.</p>
+    </div>
+
+    <div class="info-card"><h3>🎮 آخرین عملیات</h3><div id="adminActions"></div></div>
+    <div class="info-card"><h3>🔑 آخرین ورودها</h3><div id="adminLogins"></div></div>
+  </div>
 </section>
 </main>
 
@@ -294,6 +345,7 @@ const defaults={
 let state={...defaults};
 let serverReady=false;
 let connecting=false;
+let isAdmin=false;
 let booting=true;          /* تا زمانی که تلگرام آماده نشده */
 let lastError="";
 let busy=false;
@@ -463,6 +515,7 @@ async function login(){
 
     connecting=false;
     applyServerState(result.state);
+    setAdmin(!!result.is_admin);
     toast("به نخلستان ماهان خوش آمدی");
   }catch(error){
     serverReady=false;
@@ -966,6 +1019,10 @@ function openTab(name){
   if(name==="ranking"){
     loadLeaderboard();
   }
+
+  if(name==="admin"&&isAdmin){
+    loadAdminPlayers();
+  }
 }
 
 document.querySelectorAll(".tab").forEach(button=>{
@@ -1126,6 +1183,12 @@ function ui(){
     const key=BUY_KEYS[button.dataset.buy];
     button.classList.toggle("pulse",needs.some(need=>need.key===key));
   });
+
+  $("buildInfo").textContent="نسخهٔ ۳ · "+(
+    (connecting||booting)?"در حال اتصال...":
+    !serverReady?"اتصال برقرار نیست":
+    isAdmin?"ادمین ✓":"حساب عادی (ادمین نیست)"
+  );
 
   updateMissions();
   showScene();
@@ -1305,6 +1368,240 @@ async function loadLeaderboard(){
 }
 
 $("refreshRanking").addEventListener("click",loadLeaderboard);
+
+/* ========= پنل مدیریت (فقط برای ادمین؛ دسترسی در سرور هم بررسی می‌شود) ========= */
+let adminPlayers=[];
+let adminSelected=null;
+let adminSelectedUsername="";
+
+const ACTION_NAMES={
+  prepare:"آماده‌سازی زمین",plant:"کاشت نهال",water:"آبیاری",fertilize:"کوددهی",
+  harvest:"برداشت",buy_water:"خرید آب",buy_fertilizer:"خرید کود",buy_seedling:"خرید نهال"
+};
+
+const num=value=>fa(Math.round(Number(value)||0));
+
+function setAdmin(value){
+  isAdmin=!!value;
+  $("adminTab").classList.toggle("hidden",!isAdmin);
+  document.querySelector(".topnav").classList.toggle("has-admin",isAdmin);
+  ui();
+}
+
+function fmtDate(value){
+  if(!value)return "—";
+  try{
+    const date=new Date(String(value).replace(" ","T")+"Z");
+    if(isNaN(date))return String(value);
+    return date.toLocaleString("fa-IR");
+  }catch{
+    return String(value);
+  }
+}
+
+function displayName(player){
+  return [player.first_name,player.last_name].filter(Boolean).join(" ")||
+    player.username||("کاربر "+player.telegram_id);
+}
+
+/* همه متن‌ها با textContent درج می‌شوند تا نام بازیکن‌ها کد اجرا نکند */
+function addKV(box,label,value){
+  const row=document.createElement("div");
+  row.className="kv";
+
+  const a=document.createElement("span");
+  a.textContent=label;
+
+  const b=document.createElement("span");
+  b.textContent=value;
+
+  row.append(a,b);
+  box.appendChild(row);
+}
+
+function addLog(box,left,right){
+  const row=document.createElement("div");
+  row.className="log-line";
+
+  const a=document.createElement("span");
+  a.textContent=left;
+
+  const b=document.createElement("span");
+  b.textContent=right;
+
+  row.append(a,b);
+  box.appendChild(row);
+}
+
+function renderAdminList(){
+  const list=$("adminList");
+  const query=$("adminSearch").value.trim().toLowerCase();
+
+  list.textContent="";
+
+  const filtered=adminPlayers.filter(player=>{
+    if(!query)return true;
+    return (displayName(player)+" "+(player.username||"")+" "+player.telegram_id)
+      .toLowerCase().includes(query);
+  });
+
+  if(!filtered.length){
+    const empty=document.createElement("div");
+    empty.className="empty";
+    empty.textContent="بازیکنی پیدا نشد.";
+    list.appendChild(empty);
+    return;
+  }
+
+  filtered.slice(0,300).forEach((player,index)=>{
+    const row=document.createElement("div");
+    row.className="admin-row";
+
+    const rank=document.createElement("span");
+    rank.className="leader-rank";
+    rank.textContent=fa(index+1);
+
+    const who=document.createElement("div");
+    who.className="who";
+
+    const name=document.createElement("b");
+    name.textContent=displayName(player);
+
+    const sub=document.createElement("small");
+    sub.textContent=(player.username?"@"+player.username+" · ":"")+"ID: "+player.telegram_id;
+
+    who.append(name,sub);
+
+    const score=document.createElement("span");
+    score.className="leader-score";
+    score.textContent=num(player.total_score)+" امتیاز";
+
+    row.append(rank,who,score);
+    row.addEventListener("click",()=>openAdminPlayer(player.telegram_id));
+    list.appendChild(row);
+  });
+}
+
+async function loadAdminPlayers(){
+  if(!isAdmin)return;
+
+  $("adminSummary").textContent="در حال دریافت فهرست بازیکنان...";
+
+  try{
+    const result=await api("/api/admin",{},true);
+    adminPlayers=result.players||[];
+    $("adminSummary").textContent="تعداد بازیکنان: "+num(adminPlayers.length);
+    renderAdminList();
+  }catch(error){
+    $("adminSummary").textContent=error.message;
+    toast(error.message);
+  }
+}
+
+async function openAdminPlayer(id){
+  try{
+    const result=await api("/api/admin/player",{telegram_id:String(id)});
+
+    const player=result.player||{};
+    const state=result.state||{};
+
+    adminSelected=String(player.telegram_id||id);
+    adminSelectedUsername=/^[A-Za-z0-9_]{3,32}$/.test(player.username||"")?player.username:"";
+
+    $("adminDetailTitle").textContent=displayName(player);
+
+    const info=$("adminDetailInfo");
+    info.textContent="";
+
+    addKV(info,"شناسه تلگرام",adminSelected);
+    addKV(info,"نام‌کاربری",player.username?"@"+player.username:"ندارد");
+    addKV(info,"نام",displayName(player));
+    addKV(info,"امتیاز کل",num(player.total_score));
+    addKV(info,"آخرین ورود",fmtDate(player.last_seen));
+    addKV(info,"تعداد ورود",num(result.login_count));
+    addKV(info,"سطح",num(state.level));
+    addKV(info,"سکه",num(state.coins));
+    addKV(info,"نخل برداشت‌شده",num(state.trees));
+    addKV(info,"تجربه",num(state.xp));
+    addKV(info,"رشد نخل فعلی",num(state.growth)+"٪");
+    addKV(info,"نهال / آب / کود",num(state.seedling)+" / "+num(state.water)+" / "+num(state.fertilizer));
+    addKV(info,"مراحل فعلی",
+      (state.prepared?"زمین ✓ ":"زمین ✗ ")+
+      (state.planted?"کاشت ✓ ":"کاشت ✗ ")+
+      (state.watered?"آب ✓ ":"آب ✗ ")+
+      (state.fertilized?"کود ✓":"کود ✗"));
+    addKV(info,"آخرین تغییر بازی",fmtDate(state.updated_at));
+
+    $("adminOpenChat").classList.toggle("hidden",!adminSelectedUsername);
+
+    const actions=$("adminActions");
+    actions.textContent="";
+    (result.actions||[]).forEach(item=>{
+      addLog(actions,
+        (ACTION_NAMES[item.action]||item.action)+(Number(item.score_change)?" (+"+num(item.score_change)+")":""),
+        fmtDate(item.created_at));
+    });
+    if(!actions.children.length)addLog(actions,"موردی ثبت نشده","");
+
+    const logins=$("adminLogins");
+    logins.textContent="";
+    (result.logins||[]).forEach(item=>addLog(logins,"ورود به بازی",fmtDate(item.logged_at)));
+    if(!logins.children.length)addLog(logins,"موردی ثبت نشده","");
+
+    $("adminText").value="";
+    $("adminListWrap").classList.add("hidden");
+    $("adminDetail").classList.remove("hidden");
+    window.scrollTo({top:0});
+  }catch(error){
+    toast(error.message);
+  }
+}
+
+async function sendAdminMessage(){
+  const text=$("adminText").value.trim();
+
+  if(!adminSelected)return;
+
+  if(!text){
+    toast("متن پیام را بنویس.");
+    return;
+  }
+
+  const button=$("adminSend");
+  button.disabled=true;
+
+  try{
+    await api("/api/admin/message",{telegram_id:adminSelected,text});
+    $("adminText").value="";
+    toast("پیام ارسال شد ✓");
+  }catch(error){
+    toast(error.message);
+  }finally{
+    button.disabled=false;
+  }
+}
+
+$("adminSearch").addEventListener("input",renderAdminList);
+$("adminRefresh").addEventListener("click",loadAdminPlayers);
+$("adminSend").addEventListener("click",sendAdminMessage);
+
+$("adminBack").addEventListener("click",()=>{
+  adminSelected=null;
+  $("adminDetail").classList.add("hidden");
+  $("adminListWrap").classList.remove("hidden");
+});
+
+$("adminOpenChat").addEventListener("click",()=>{
+  if(!adminSelectedUsername)return;
+
+  const link="https://t.me/"+adminSelectedUsername;
+
+  if(tg&&typeof tg.openTelegramLink==="function"){
+    tg.openTelegramLink(link);
+  }else{
+    window.open(link,"_blank","noopener");
+  }
+});
 
 /* شروع بازی */
 ui();
