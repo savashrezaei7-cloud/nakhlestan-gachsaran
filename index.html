@@ -85,6 +85,11 @@ main{padding:10px 11px 25px}
 .empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:12px;line-height:2}
 .toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
 .toast.show{opacity:1}
+.btn-text{position:relative}
+.needs{display:none;margin-top:7px;padding:8px 10px;border-radius:10px;background:#7a2e2e55;border:1px solid #e0786a88;color:#ffd9d2;font-size:11px;line-height:1.9;text-align:center}
+.needs.show{display:block}
+.primary.pulse{outline:2px solid #ff8a7a;outline-offset:2px}
+main{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}
 .hidden{display:none!important}
 @media(max-width:370px){
   .brand{font-size:15px}.tab{font-size:9px}.act b{font-size:9px}.act{min-height:62px}
@@ -130,6 +135,7 @@ main{padding:10px 11px 25px}
   </div>
 
   <div class="hint" id="hint">در حال دریافت اطلاعات نخلستان...</div>
+  <div class="needs" id="needs" role="alert"></div>
   <div class="retry-wrap"><button id="retry" class="primary hidden">↻ تلاش دوباره</button></div>
 
   <div class="actions">
@@ -204,27 +210,67 @@ main{padding:10px 11px 25px}
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 "use strict";
 
 /* تنظیمات اتصال */
 const WORKER_URL="https://nakhlestan-bot.savashrezaei7.workers.dev";
-const tg=window.Telegram?.WebApp;
+let tg=null;
+let initData="";
 
-if(tg){
+/* بارگذاری اسکریپت تلگرام بدون مسدود کردن صفحه.
+   اگر دسترسی به telegram.org کند یا قطع بود، بعد از چند ثانیه بازی ادامه پیدا می‌کند. */
+function loadTelegramScript(){
+  return new Promise(resolve=>{
+    if(window.Telegram&&window.Telegram.WebApp){resolve();return;}
+
+    const script=document.createElement("script");
+    script.src="https://telegram.org/js/telegram-web-app.js";
+    script.async=true;
+
+    const timer=setTimeout(resolve,4000);
+    const done=()=>{clearTimeout(timer);resolve();};
+
+    script.onload=done;
+    script.onerror=done;
+    document.head.appendChild(script);
+  });
+}
+
+/* تلگرام اطلاعات ورود را در آدرس (hash) هم می‌فرستد؛ اگر اسکریپت لود نشد از همین استفاده می‌کنیم */
+function readInitDataFromUrl(){
   try{
-    tg.ready();
-    tg.expand();
-    tg.disableVerticalSwipes?.();
-    tg.setHeaderColor?.("#14251b");
-    tg.setBackgroundColor?.("#101b15");
-  }catch(error){
-    console.warn("Telegram WebApp setup:",error);
+    const raw=location.hash.replace(/^#/,"");
+    const value=new URLSearchParams(raw).get("tgWebAppData");
+
+    if(value){
+      try{sessionStorage.setItem("tgInitData",value);}catch{}
+      return value;
+    }
+
+    try{return sessionStorage.getItem("tgInitData")||"";}catch{return "";}
+  }catch{
+    return "";
   }
 }
 
-const initData=tg?.initData||"";
+function setupTelegram(){
+  tg=window.Telegram?.WebApp||null;
+
+  if(tg){
+    try{
+      tg.ready();
+      tg.expand();
+      tg.disableVerticalSwipes?.();
+      tg.setHeaderColor?.("#14251b");
+      tg.setBackgroundColor?.("#101b15");
+    }catch(error){
+      console.warn("Telegram WebApp setup:",error);
+    }
+  }
+
+  initData=tg?.initData||readInitDataFromUrl();
+}
 const $=id=>document.getElementById(id);
 
 const fa=value=>String(value??0).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
@@ -248,6 +294,7 @@ const defaults={
 let state={...defaults};
 let serverReady=false;
 let connecting=false;
+let booting=true;          /* تا زمانی که تلگرام آماده نشده */
 let lastError="";
 let busy=false;
 let taskLabel="";          /* متن مرحله‌ای که در حال انجام است */
@@ -911,6 +958,35 @@ function updateMissions(){
   });
 }
 
+/* نیازهای بازیکن: اگر نهال، آب یا کود تمام شده باشد */
+function getNeeds(){
+  const items=[
+    {key:"seedling",name:"نهال",icon:"🌱",count:state.seedling,needNow:!state.planted,cost:40},
+    {key:"water",name:"آب",icon:"💧",count:state.water,needNow:!!state.planted&&!state.watered,cost:15},
+    {key:"fertilizer",name:"کود",icon:"🌿",count:state.fertilizer,needNow:!!state.planted&&!state.fertilized,cost:25}
+  ];
+
+  const list=[];
+
+  items.forEach(item=>{
+    if(item.count>=1)return;
+
+    let text=item.needNow
+      ?`${item.icon} به ${item.name} نیاز داریم؛ از فروشگاه ${item.name} بخر.`
+      :`${item.icon} موجودی ${item.name} تمام شده؛ از فروشگاه ${item.name} بخر.`;
+
+    if(state.coins<item.cost){
+      text+=` (قیمت ${fa(item.cost)} سکه است و سکه کافی نداری)`;
+    }
+
+    list.push({key:item.key,text,urgent:item.needNow});
+  });
+
+  return list;
+}
+
+const BUY_KEYS={buy_water:"water",buy_fertilizer:"fertilizer",buy_seedling:"seedling"};
+
 /* به‌روزرسانی تمام بخش‌های صفحه */
 function ui(){
   $("coins").textContent=fa(Math.round(state.coins));
@@ -956,11 +1032,11 @@ function ui(){
   });
 
   /* دکمه تلاش دوباره */
-  $("retry").classList.toggle("hidden",serverReady||connecting);
+  $("retry").classList.toggle("hidden",serverReady||connecting||booting);
 
   /* وضعیت بازیکن */
   $("status").textContent=
-    connecting?"در حال اتصال...":
+    (connecting||booting)?"در حال اتصال...":
     !serverReady?"خطا در اتصال":
     busy&&taskLabel?"در حال انجام کار":
     growth>=100&&state.planted?"آماده برداشت":
@@ -976,15 +1052,36 @@ function ui(){
 
   /* راهنمای مرحله بعد */
   $("hint").textContent=
-    connecting?"در حال دریافت اطلاعات نخلستان...":
+    (connecting||booting)?"در حال دریافت اطلاعات نخلستان...":
     !serverReady?(lastError||"برای شروع بازی باید اتصال تلگرام برقرار شود."):
     busy&&taskLabel?taskLabel+"... تا پایان کار صبر کن.":
     !state.prepared&&!state.planted?"برای شروع، زمین را آماده کن.":
+    !state.planted&&state.seedling<1?"نهال نداری؛ از فروشگاه نهال بخر.":
     !state.planted?"گودال آماده است؛ نهال مجول را بکار.":
     growth>=100?"خرما آماده برداشت است.":
+    !state.watered&&state.water<1?"آب نداری؛ از فروشگاه آب بخر.":
     !state.watered?"نهال را آبیاری کن.":
+    !state.fertilized&&state.fertilizer<1?"کود نداری؛ از فروشگاه کود بخر.":
     !state.fertilized?"مرحله بعد، کوددهی نخل است.":
     "مراحل مراقبت از نخل را با دکمه‌های بالا انجام بده.";
+
+  /* پیام نیازها و برجسته شدن دکمه خرید مربوطه */
+  const needs=serverReady?getNeeds():[];
+  const needsBox=$("needs");
+  needsBox.innerHTML="";
+
+  needs.forEach(need=>{
+    const row=document.createElement("div");
+    row.textContent=need.text;
+    needsBox.appendChild(row);
+  });
+
+  needsBox.classList.toggle("show",needs.length>0);
+
+  document.querySelectorAll("[data-buy]").forEach(button=>{
+    const key=BUY_KEYS[button.dataset.buy];
+    button.classList.toggle("pulse",needs.some(need=>need.key===key));
+  });
 
   updateMissions();
   showScene();
@@ -1043,10 +1140,14 @@ async function perform(action){
       ui();
     }
 
+    const needsBefore=getNeeds().map(need=>need.key);
     const result=await api("/api/action",{action});
 
     applyServerState(result.state);
-    toast(result.message||"عملیات با موفقیت ثبت شد");
+    const newNeeds=getNeeds().filter(need=>!needsBefore.includes(need.key));
+    const base=result.message||"عملیات با موفقیت ثبت شد";
+
+    toast(newNeeds.length?base+" — "+newNeeds[0].text:base);
   }catch(error){
     toast(error.message);
     console.error("Action error:",error);
@@ -1169,7 +1270,14 @@ $("refreshRanking").addEventListener("click",loadLeaderboard);
 
 /* شروع بازی */
 ui();
-login();
+
+(async function start(){
+  await loadTelegramScript();
+  setupTelegram();
+  booting=false;
+  ui();
+  login();
+})();
 
 </script>
 </body>
