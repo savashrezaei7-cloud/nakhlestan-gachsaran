@@ -34,7 +34,7 @@ main{padding:10px 11px calc(25px + env(safe-area-inset-bottom,0px))}
 .farmhead strong{font-size:14px}.farmhead span{font-size:11px;color:var(--muted)}
 #scene,#runScene{position:relative;width:100%;overflow:hidden;border-radius:16px;border:1px solid #ffffff25;background:#8eb4a1;box-shadow:0 7px 20px #0003}
 #scene{height:clamp(210px,34vh,290px)}
-#runScene{height:clamp(330px,56vh,470px);touch-action:none;user-select:none}
+#runScene{height:clamp(240px,40vh,330px);touch-action:none;user-select:none}
 canvas{width:100%;height:100%;display:block}
 .scene-label{position:absolute;bottom:8px;right:9px;padding:5px 10px;border-radius:9px;color:#fff;background:#14251be8;font-size:11px;border:1px solid #ffffff25;pointer-events:none}
 .hint{text-align:center;font-size:11px;color:#e9e5d4;padding:6px 8px;background:#ffffff0b;border-radius:10px;margin-top:7px;line-height:1.8}
@@ -77,7 +77,7 @@ canvas{width:100%;height:100%;display:block}
 .win.w2{border:2px solid #d9dde5;background:linear-gradient(145deg,#4a4f58,#262a2e)}
 .win.w3{border:2px solid #cd7f32;background:linear-gradient(145deg,#573a1d,#2b2218)}
 .empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:12px;line-height:2}
-.toast{position:fixed;z-index:30;bottom:22px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
+.toast{position:fixed;z-index:2000;bottom:22px;left:50%;transform:translateX(-50%);background:#263d2b;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
 .toast.show{opacity:1}
 .coin{vertical-align:-2px;margin-inline-end:2px}
 .needs{display:none;margin-top:7px;padding:8px 10px;border-radius:10px;background:#7a2e2e55;border:1px solid #e0786a88;color:#ffd9d2;font-size:11px;line-height:1.9;text-align:center}
@@ -88,6 +88,12 @@ canvas{width:100%;height:100%;display:block}
 .hidden{display:none!important}
 .jumpbtn{position:absolute;left:10px;right:10px;bottom:8px;height:52px;border:0;border-radius:16px;background:linear-gradient(145deg,#f3d27a,#d9a93a);color:#2a2417;font-weight:900;font-size:17px;box-shadow:0 4px 0 #8f6a1c,0 6px 14px #0005;opacity:.92;font-family:inherit;touch-action:manipulation}
 .jumpbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #8f6a1c}
+.closefs{display:none;position:absolute;top:8px;left:8px;z-index:5;width:38px;height:38px;border-radius:50%;border:1px solid #fff5;background:#000a;color:#fff;font-size:18px;line-height:1}
+#runScene.fs .closefs{display:block}
+#runScene.fs{position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;width:100dvw;height:100dvh;border-radius:0;border:0;box-shadow:none}
+#runScene.fs .jumpbtn{height:46px;bottom:6px}
+@media (orientation:portrait){#runScene.fs{width:100vh;height:100vw;width:100dvh;height:100dvw;transform-origin:0 0;transform:translateX(100vw) rotate(90deg);transform:translateX(100dvw) rotate(90deg)}}
+body.nofs{overflow:hidden}
 .admin-search,.admin-text{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#ffffff0b;color:#fff;font:inherit;font-size:12px}
 .admin-search{margin-bottom:8px}.admin-text{min-height:90px;resize:vertical;line-height:1.9}
 .admin-row{display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:12px;cursor:pointer}
@@ -160,10 +166,11 @@ canvas{width:100%;height:100%;display:block}
   <div id="runScene">
     <canvas id="runCanvas"></canvas>
     <button class="jumpbtn" id="jumpBtn" type="button">⬆ پرش</button>
+    <button class="closefs" id="closeFs" type="button">✕</button>
     <div class="overlay" id="runOverlay">
       <h2 id="runTitle">باغبان دونده</h2>
-      <div id="runText">فقط یک دکمه داری: پرش! ضربه روی صفحه یا دکمهٔ پرش<br>از روی مانع‌های زمینی بپر، ولی زیر پرنده‌ها نپر!<br>🟤 خرما ۱ امتیاز · ⭐ مجول ۲۰ امتیاز و سرعت بیشتر</div>
-      <button class="primary" id="runStart" disabled>▶ شروع</button>
+      <div id="runText">فقط یک دکمه داری: پرش! ضربه روی صفحه یا دکمهٔ پرش<br>از روی مانع‌های زمینی بپر، ولی زیر پرنده‌ها نپر!<br>🟤 خرما ۱ امتیاز · ⭐ مجول ۲۰ امتیاز و سرعت بیشتر<br>هر ۱۰۰ متر سریع‌تر و سخت‌تر می‌شود</div>
+      <button class="primary" id="runStart" disabled>▶ شروع (تمام‌صفحه)</button>
     </div>
   </div>
   <div class="panel">
@@ -528,6 +535,7 @@ function animate(ts){
 function openTab(name){
   const target=$("view-"+name);if(!target)return;
   if(name!=="runner"&&R.running)endRun();
+  if(name!=="runner")exitFS();
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   target.classList.add("active");
@@ -636,15 +644,16 @@ const ENVS=[
   {n:"طوفان شنی",sky:["#c98f4e","#efd09a"],hill:"#d7a964",hill2:"#b88848",gr:"#dcb677",gr2:"#bd9553",tree:"#8f7a38",sun:"#f9e2a0",body:"sun"}
 ];
 /* اندازهٔ مانع‌ها (واحد S) */
-const DIM={stump:{w:26,h:30},bucket:{w:26,h:34},scare:{w:28,h:54},wide:{w:46,h:32},pit:{w:52,h:0},bird:{w:34,h:18}};
-const R={running:false,over:true,token:"",dist:0,speed:9,dates:0,majool:0,jumpT:-1,buf:0,boost:0,objs:[],nextM:22,prevM:null,last:"",t0:0,flash:0,busySend:false};
+const DIM={rock:{w:32,h:22},cactus:{w:28,h:58},triple:{w:70,h:34},stump:{w:26,h:30},bucket:{w:26,h:34},scare:{w:28,h:54},wide:{w:46,h:32},pit:{w:52,h:0},bird:{w:34,h:18}};
+const R={running:false,over:true,token:"",dist:0,speed:9,dates:0,majool:0,jumpT:-1,buf:0,boost:0,objs:[],nextM:22,prevM:null,last:"",t0:0,flash:0,banner:0,bannerT:"",lvl:0,hi:0,base:9,busySend:false};
 
 function resizeRun(){
-  const r=rc.getBoundingClientRect();if(!r.width||!r.height)return;
-  RW=r.width;RH=r.height;RDPR=Math.min(window.devicePixelRatio||1,2);
+  const w=rc.clientWidth,h=rc.clientHeight;if(!w||!h)return;
+  RW=w;RH=h;RDPR=Math.min(window.devicePixelRatio||1,2);
   rc.width=Math.round(RW*RDPR);rc.height=Math.round(RH*RDPR);rx.setTransform(RDPR,0,0,RDPR,0,0);
 }
-function layout(){LS=RH/360;LGY=RH*.72;LPX=RW*.22;LPPM=RW/20;}
+function layout(){LS=RH/360;LGY=RH*.72;LPX=RW*(RW>RH*1.4?.14:.22);LPPM=LS*16;}
+function speedAt(d){return 9+Math.min(9,Math.floor(d/100)*.9);}
 function mod(a,b){return((a%b)+b)%b;}
 function runLevel(){const p=(runnerStats.total_dates||0)+20*(runnerStats.total_majool||0);return 1+Math.floor(Math.sqrt(p/60));}
 function renderRunnerInfo(){
@@ -673,14 +682,27 @@ function runJump(){
   if(R.jumpT<0)R.jumpT=0;else R.buf=.12;
 }
 
+function fsFix(){requestAnimationFrame(()=>{resizeRun();requestAnimationFrame(resizeRun);});setTimeout(resizeRun,250);}
+function enterFS(){
+  const sc=$("runScene");if(sc.classList.contains("fs"))return;
+  sc.classList.add("fs");document.body.classList.add("nofs");
+  try{const p=screen.orientation&&screen.orientation.lock&&screen.orientation.lock("landscape");if(p&&p.catch)p.catch(()=>{});}catch(e){}
+  fsFix();
+}
+function exitFS(){
+  $("runScene").classList.remove("fs");document.body.classList.remove("nofs");
+  try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock();}catch(e){}
+  fsFix();
+}
 async function startRun(){
   if(R.running||R.busySend||!serverReady)return;
   $("runStart").disabled=true;
+  enterFS();
   try{
     const res=await api("/api/run/start");
     R.token=res.token;
-  }catch(e){toast(e.message);$("runStart").disabled=false;return;}
-  Object.assign(R,{running:true,over:false,dist:0,speed:9,dates:0,majool:0,jumpT:-1,buf:0,boost:0,objs:[],nextM:22,prevM:null,last:"",t0:performance.now(),flash:0});
+  }catch(e){exitFS();toast(e.message);$("runStart").disabled=false;return;}
+  Object.assign(R,{running:true,over:false,dist:0,speed:9,dates:0,majool:0,jumpT:-1,buf:0,boost:0,objs:[],nextM:22,prevM:null,last:"",t0:performance.now(),flash:0,base:9,banner:0,bannerT:"",lvl:0});
   $("runOverlay").classList.add("hidden");
 }
 
@@ -688,15 +710,19 @@ async function startRun(){
 function spawn(){
   const viewM=(RW-LPX)/LPPM+8;
   while(R.nextM<R.dist+viewM){
-    const d=R.nextM,env=Math.floor(d/400),sp=9+Math.min(9,d/120);
+    const d=R.nextM,lvl=Math.floor(d/100),sp=speedAt(d);
     let k;
-    if(d>120&&Math.random()<.26&&R.last!=="bird")k="bird";
+    if(lvl>=1&&R.last!=="bird"&&Math.random()<Math.min(.36,.14+lvl*.03))k="bird";
     else{
       const pool=["stump","bucket"];
-      if(env>=1)pool.push("scare","wide");
-      if(env>=2)pool.push("pit");
-      if(env>=3)pool.push("wide","scare");
+      if(lvl>=1)pool.push("rock","wide");
+      if(lvl>=2)pool.push("scare");
+      if(lvl>=3)pool.push("pit");
+      if(lvl>=4)pool.push("cactus");
+      if(lvl>=5)pool.push("triple");
+      if(lvl>=6)pool.push("pit","triple","cactus");
       k=pool[Math.floor(Math.random()*pool.length)];
+      if(k===R.last&&Math.random()<.5)k=pool[Math.floor(Math.random()*pool.length)];
     }
     /* خرمای زمینی وسط فاصله (بدون پرش جمع می‌شود) */
     if(R.prevM!==null){
@@ -713,16 +739,21 @@ function spawn(){
     }
     R.objs.push({m:d,k});
     R.prevM=d;R.last=k;
-    const gapS=Math.max(.85,1.75-d/1700)+Math.random()*.7;
-    R.nextM=d+gapS*sp*1.3;
+    /* هر ۱۰۰ متر فاصله‌ها کمتر می‌شود (حداقل ۰٫۸۵ ثانیه تا همیشه جای پرش و فرود باشد) */
+    const gapS=Math.max(.85,1.75-lvl*.1)+Math.random()*Math.max(.25,.7-lvl*.04);
+    R.nextM=d+gapS*Math.max(sp,R.base)*1.3;
   }
 }
 
 function runFrame(dt){
   const now=performance.now();
-  R.speed=(9+Math.min(9,R.dist/120))*(R.boost>0?1.3:1);
+  R.base+=(speedAt(R.dist)-R.base)*Math.min(1,dt*1.5);
+  R.speed=R.base*(R.boost>0?1.3:1);
   if(R.boost>0)R.boost-=dt;
   R.dist+=R.speed*dt;
+  const lv=Math.floor(R.dist/100);
+  if(lv>R.lvl){R.lvl=lv;R.banner=1.8;R.bannerT="⚡ "+fa(lv*100)+" متر — سریع‌تر و سخت‌تر!";}
+  if(R.banner>0)R.banner-=dt;
   if(R.buf>0)R.buf-=dt;
   if(R.jumpT<0&&R.buf>0){R.jumpT=0;R.buf=0;}
   if(R.jumpT>=0){R.jumpT+=dt;if(R.jumpT>=JUMP_T)R.jumpT=-1;}
@@ -810,6 +841,21 @@ function drawScare(x,gy,S){
   k.fillStyle="#3a2a1a";k.fillRect(x-4*S,gy-50*S,2*S,2*S);k.fillRect(x+2*S,gy-50*S,2*S,2*S);
   k.fillStyle="#a5733a";k.beginPath();k.ellipse(x,gy-54*S,14*S,3.4*S,0,0,Math.PI*2);k.fill();
   k.beginPath();k.ellipse(x,gy-57*S,8*S,5*S,0,0,Math.PI*2);k.fill();
+}
+function drawRock(x,gy,S){
+  const k=rx;
+  k.fillStyle="#6d7075";k.beginPath();k.moveTo(x-16*S,gy);k.lineTo(x-12*S,gy-14*S);k.lineTo(x-2*S,gy-22*S);k.lineTo(x+9*S,gy-18*S);k.lineTo(x+16*S,gy-6*S);k.lineTo(x+14*S,gy);k.closePath();k.fill();
+  k.fillStyle="#9a9da2";k.beginPath();k.moveTo(x-12*S,gy-14*S);k.lineTo(x-2*S,gy-22*S);k.lineTo(x+2*S,gy-12*S);k.lineTo(x-8*S,gy-6*S);k.closePath();k.fill();
+  k.fillStyle="#c4c7cb";k.beginPath();k.ellipse(x-6*S,gy-16*S,3*S,1.6*S,-.5,0,Math.PI*2);k.fill();
+}
+function drawCactus(x,gy,S){
+  const k=rx;
+  k.lineCap="round";k.lineJoin="round";
+  k.strokeStyle="#237a3b";k.lineWidth=10*S;k.beginPath();k.moveTo(x,gy);k.lineTo(x,gy-50*S);k.stroke();
+  k.lineWidth=7*S;k.beginPath();k.moveTo(x,gy-26*S);k.lineTo(x-12*S,gy-26*S);k.lineTo(x-12*S,gy-40*S);k.moveTo(x,gy-20*S);k.lineTo(x+12*S,gy-20*S);k.lineTo(x+12*S,gy-34*S);k.stroke();
+  k.strokeStyle="#43b85f";k.lineWidth=3*S;k.beginPath();k.moveTo(x-2*S,gy-2*S);k.lineTo(x-2*S,gy-48*S);k.stroke();
+  k.fillStyle="#f06292";k.beginPath();k.arc(x,gy-56*S,3.4*S,0,Math.PI*2);k.fill();
+  k.fillStyle="#ffe082";k.beginPath();k.arc(x,gy-56*S,1.4*S,0,Math.PI*2);k.fill();
 }
 function drawPit(x,gy,S){
   const k=rx,w=DIM.pit.w*S;
@@ -912,6 +958,9 @@ function runDraw(dt,idle){
     else if(o.k==="scare")drawScare(x,gy,S);
     else if(o.k==="wide"){drawStump(x-12*S,gy,S);drawStump(x+12*S,gy,S);}
     else if(o.k==="pit")drawPit(x,gy,S);
+    else if(o.k==="rock")drawRock(x,gy,S);
+    else if(o.k==="cactus")drawCactus(x,gy,S);
+    else if(o.k==="triple"){drawStump(x-24*S,gy,S);drawStump(x,gy,S);drawStump(x+24*S,gy,S);}
     else if(o.k==="bird")drawBird(x,gy,S);
   }
   drawGardener(px,gy,jumpH(),S,idle);
@@ -926,9 +975,16 @@ function runDraw(dt,idle){
   c.shadowColor="#0008";c.shadowBlur=4;
   c.textAlign="right";c.fillText("🟤 "+fa(R.dates)+"   ⭐ "+fa(R.majool),RW-10,22);
   c.textAlign="left";c.fillText(fa(Math.floor(d))+" متر",10,22);
+  if(R.hi>0){c.font="12px Tahoma,sans-serif";c.fillText("رکورد "+fa(R.hi),10,38);c.font="bold 13px Tahoma,sans-serif";}
   c.textAlign="center";c.fillText(env.n,RW/2,22);
   c.shadowBlur=0;
-  if(R.boost>0){c.fillStyle="#e8c77d";c.fillRect(10,32,(RW-20)*R.boost/BOOST_SEC,4);}
+  if(R.banner>0&&R.running){
+    c.globalAlpha=Math.min(1,R.banner);c.font="bold 15px Tahoma,sans-serif";c.textAlign="center";
+    const tw=c.measureText(R.bannerT).width+26;
+    c.fillStyle="#000a";c.fillRect(RW/2-tw/2,40,tw,28);c.fillStyle="#ffe27a";c.fillText(R.bannerT,RW/2,59);
+    c.globalAlpha=1;c.font="bold 13px Tahoma,sans-serif";
+  }
+  if(R.boost>0){c.fillStyle="#e8c77d";c.fillRect(10,RH>300?76:32,(RW-20)*R.boost/BOOST_SEC,4);}
   if(R.flash>0){c.fillStyle=R.flash>1?"#ff3b3b55":"#fff3";if(R.flash>1||Math.random()<.5)c.fillRect(0,0,RW,RH);R.flash=Math.max(0,R.flash-dt*4);}
 }
 
@@ -936,6 +992,7 @@ async function endRun(){
   if(!R.running)return;
   R.running=false;R.over=true;R.busySend=true;
   const dates=R.dates,majool=R.majool,dist=Math.floor(R.dist),token=R.token;
+  R.hi=Math.max(R.hi,dist);
   $("runOverlay").classList.remove("hidden");
   $("runTitle").textContent="پایان دور";
   $("runText").innerHTML="🟤 "+fa(dates)+" خرما · ⭐ "+fa(majool)+" مجول · "+fa(dist)+" متر<br>در حال ثبت نتیجه...";
@@ -952,6 +1009,9 @@ async function endRun(){
   }
 }
 $("runStart").addEventListener("click",startRun);
+$("closeFs").addEventListener("pointerdown",e=>e.stopPropagation());
+$("closeFs").addEventListener("click",e=>{e.stopPropagation();if(R.running)endRun();exitFS();});
+if("ResizeObserver" in window)new ResizeObserver(resizeRun).observe(rc);
 const rs=$("runScene");
 rs.addEventListener("pointerdown",e=>{if(!R.running)return;e.preventDefault();runJump();});
 window.addEventListener("keydown",e=>{
