@@ -179,8 +179,8 @@ canvas{width:100%;height:100%;display:block}
   <div class="section-title">🎯 مأموریت روزانه</div>
   <div class="section-subtitle">هر روز ساعت ۰۰:۰۰ به وقت ایران تازه می‌شود.</div>
   <div class="info-card">
-    <h3>👥 ۵ نفر را به بازی دعوت کن — ۳۰۰ امتیاز</h3>
-    <p>هر کسی که برای اولین بار با لینک تو وارد ربات شود حساب می‌شود.</p>
+    <h3>📤 لینک بازی را برای ۵ نفر بفرست — ۳۰۰ امتیاز</h3>
+    <p>هر بار دکمهٔ «ارسال به دوستان» را بزنی و برای یک نفر بفرستی یک ارسال حساب می‌شود؛ لازم نیست آن‌ها وارد بازی شوند. اگر امتیازت بالای ۱۰۰۰ باشد، بدون انجام این مأموریت بازی بسته می‌ماند.</p>
     <div class="bar"><i id="refBar"></i></div>
     <div class="row" style="margin-top:8px"><span id="refCount">۰ از ۵</span><span class="muted" id="refState"></span></div>
     <div class="linkbox" id="refLink">...</div>
@@ -300,7 +300,10 @@ async function api(path,data={},safe=false){
   const r=await request(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData,...data})},15000,safe);
   let res;
   try{res=await r.json();}catch{throw new Error("پاسخ سرور قابل خواندن نیست.");}
-  if(!r.ok||!res.success)throw new Error(res?.error||"ارتباط با سرور برقرار نشد.");
+  if(!r.ok||!res.success){
+    if(res&&res.code==="mission_required"){state.gate=true;try{openTab("missions");}catch{}}
+    throw new Error(res?.error||"ارتباط با سرور برقرار نشد.");
+  }
   return res;
 }
 
@@ -326,6 +329,11 @@ async function login(){
     connecting=false;
     applyServerState(res.state);
     setAdmin(!!res.is_admin);
+    try{
+      const pend=JSON.parse(localStorage.getItem(PEND_KEY)||"null");
+      if(pend&&TASKS[pend.a]&&Date.now()-pend.t<7200000&&!state.gate)setTimeout(()=>perform(pend.a,pend.t),600);
+      else savePend(null);
+    }catch{}
     if(res.runner)runnerStats=res.runner;
     if(res.ref)refInfo=res.ref;
     renderRunnerInfo();renderRef();
@@ -336,16 +344,27 @@ async function login(){
 }
 
 /* ========= سطح و ظاهر نخلستان ========= */
-const TIER_NAMES=["زمین خالی","نخلستان کوچک","نخلستان سرسبز","باغ بزرگ","نخلستان طلایی"];
-function tierOf(level){return Math.min(4,Math.floor((Math.max(1,level)-1)/3));}
-const PAL=[
+const TIER_BASE=["زمین خالی","نخلستان کوچک","نخلستان سرسبز","باغ بزرگ","نخلستان طلایی","باغ بهاری","واحهٔ سبز","باغ سلطنتی","نخلستان افسانه‌ای","باغ بهشتی"];
+const TIER_NAMES={get length(){return 50;}};
+function tierOf(level){return Math.min(49,Math.floor((Math.max(1,level)-1)/10));}
+function tierName(t){return TIER_BASE[t%10]+(t>=10?" "+fa(Math.floor(t/10)+1):"");}
+function hsl(h,s,l){return "hsl("+(((h%360)+360)%360)+","+s+"%,"+l+"%)";}
+function palFor(t){
+  const h=(t*47+25)%360,night=t%7===6;
+  return{night,
+    sky:night?[hsl(h,45,12),hsl(h,40,22),hsl(h+20,35,36)]:[hsl(h,55,62),hsl(h+18,60,78),hsl(h+35,65,85)],
+    h1:night?hsl(h+90,25,20):hsl(h+110,28,52),h2:night?hsl(h+90,25,14):hsl(h+110,30,40),
+    g:[hsl(26+(t%6)*5,42,50-(t%4)*2),hsl(24+(t%6)*5,42,38),hsl(22+(t%6)*5,38,26)]};
+}
+function bodyColor(t){return hsl((t*37+30)%360,72,52);}
+const PAL_OLD=[
   {sky:["#79b9bd","#d8c99a","#e7bd7e"],h1:"#849b78",h2:"#637f62",g:["#b88a51","#98663d","#68452f"]},
   {sky:["#6fc0d6","#cfe0a8","#e9d68a"],h1:"#7ea66f",h2:"#5c9060",g:["#b08a4a","#8f6a3a","#5f4630"]},
   {sky:["#f0a36b","#f4c27a","#f7dc9a"],h1:"#8d8a62",h2:"#6b7d4f",g:["#a67c48","#855c36","#5a3f2b"]},
   {sky:["#4f9ee0","#a8d8f0","#e5f2d0"],h1:"#5e9a5a",h2:"#3e8250",g:["#9a7a45","#7c5c33","#54402b"]},
   {sky:["#141c3d","#2e3a6e","#6c5a82"],h1:"#2e4a45",h2:"#1f3a38",g:["#6f5a3a","#54432c","#3a2e20"]}
 ];
-const BODY=["#e0a52f","#e8b43a","#ef8a2b","#d9473a","#c9a227"];
+
 
 function ellipse(x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,Math.max(0,rx),Math.max(0,ry),0,0,Math.PI*2);ctx.fill();}
 function line(x1,y1,x2,y2,color,w=2){ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
@@ -385,11 +404,11 @@ function drawSmallPalm(x,y,s){
   ctx.restore();
 }
 function drawBackground(tier){
-  const p=PAL[tier],sky=ctx.createLinearGradient(0,0,0,H);
+  const p=palFor(tier),sky=ctx.createLinearGradient(0,0,0,H);
   sky.addColorStop(0,p.sky[0]);sky.addColorStop(.65,p.sky[1]);sky.addColorStop(1,p.sky[2]);
   ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
   const sx=W*.78,sy=H*.2;
-  if(tier===4){
+  if(p.night){
     ellipse(sx,sy,14,14,"#f3f0d0");ellipse(sx+5,sy-3,12,12,p.sky[0]);
     for(let i=0;i<24;i++)ellipse((i*57+11)%W,(i*23)%(H*.45),1,1,"#fff8");
   }else{
@@ -409,7 +428,7 @@ function drawBackground(tier){
     const y=H*(.7+i*.065);ctx.strokeStyle=i%2?"#d4a36555":"#573c2b55";ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(0,y);ctx.quadraticCurveTo(W*.5,y-7,W,y+2);ctx.stroke();
   }
-  const palms=6+tier*2;
+  const palms=6+Math.min(tier,12)*2;
   for(let i=0;i<palms;i++)drawSmallPalm(W*(.05+i*(.9/palms)),H*.61+(i%2)*5,.3+(tier>=3?.1:0));
   if(tier>=1){for(let i=0;i<9;i++){const x=(i*91+17)%W,y=H*(.8+(i%3)*.06);ellipse(x,y,6,2.5,"#4f8a3d");ellipse(x+5,y-2,4,2,"#6aa04a");}}
   if(tier>=2){
@@ -420,6 +439,13 @@ function drawBackground(tier){
   if(tier>=4){
     for(let i=0;i<4;i++){const x=W*(.12+i*.26);line(x,H*.8,x,H*.7,"#3a2e20",2);ellipse(x,H*.69,5,5,"#ffd979");ellipse(x,H*.69,11,11,"#ffd97933");}
   }
+  /* تنوع هر ۱۰ سطح: یک ویژگی مخصوص هر مرحله */
+  const sp=tier%4;
+  if(tier>=5&&sp===1){for(let i=0;i<6;i++){ctx.strokeStyle=["#ff6b6b","#ffd54a","#6bdc7a","#4da3ff","#9b6bff","#ff9ad5"][i]+"88";ctx.lineWidth=4;ctx.beginPath();ctx.arc(W*.35,H*.62,H*(.34-i*.018),Math.PI,0);ctx.stroke();}}
+  if(tier>=5&&sp===2){ctx.fillStyle="#f4f8ff";[[.3,.2],[.62,.23]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(W*(a-.06),H*(b+.12));ctx.lineTo(W*a,H*b);ctx.lineTo(W*(a+.06),H*(b+.12));ctx.closePath();ctx.fill();});}
+  if(tier>=5&&sp===3){roundedRect(W*.78,H*.5,W*.14,H*.12,3,"#c9a36b");ctx.fillStyle="#a04a3a";ctx.beginPath();ctx.moveTo(W*.76,H*.5);ctx.lineTo(W*.85,H*.42);ctx.lineTo(W*.94,H*.5);ctx.closePath();ctx.fill();}
+  if(tier>=5&&sp===0){for(let i=0;i<14;i++)ellipse((i*83+31)%W,H*(.5+(i%5)*.07),1.8,1.8,"#fff7a8cc");}
+  if(tier>=9){for(let i=0;i<3;i++){const fx=W*(.15+i*.3);line(fx,H*.62,fx,H*.5,"#6b4a2e",2);ctx.fillStyle=["#e8c77d","#6bdc7a","#ff6b6b"][i%3];ctx.fillRect(fx,H*.5,16,9);}}
 }
 
 function drawHole(x,y){
@@ -431,7 +457,7 @@ function drawHole(x,y){
 /* بیل مکانیکی: با بالا رفتن سطح بزرگ‌تر و پرزرق‌وبرق‌تر می‌شود */
 function drawDigger(t){
   const tier=tierOf(state.level),moving=actionPreview==="dig";
-  const x=moving?W*.5+Math.sin(t*5)*13:W*.27,y=H*.62,s=1+tier*.13,body=BODY[tier];
+  const x=moving?W*.5+Math.sin(t*5)*13:W*.27,y=H*.62,s=1+Math.min(tier,14)*.065,body=bodyColor(tier);
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);
   ellipse(-22,-2,10,10,"#292d2a");ellipse(18,-2,10,10,"#292d2a");
   ellipse(-22,-2,4,4,"#9a9a83");ellipse(18,-2,4,4,"#9a9a83");
@@ -573,11 +599,17 @@ function ui(){
   $("fert").disabled=!ok||!state.planted||!!state.fertilized||state.fertilizer<1;
   const can=!!state.planted&&g>=100;
   $("harvest").classList.toggle("hidden",!can);$("harvest").disabled=!ok||!can;
-  document.querySelectorAll("[data-buy]").forEach(b=>{b.disabled=!ok||state.coins<(Number(b.dataset.cost)||0);});
+  const SHOP={buy_water:"💧 یک واحد آب",buy_fertilizer:"🌿 یک واحد کود",buy_seedling:"🌱 یک نهال مجول"};
+  document.querySelectorAll("[data-buy]").forEach(b=>{
+    const cost=(state.prices&&state.prices[b.dataset.buy])||Number(b.dataset.cost)||0;
+    b.dataset.cost=cost;
+    const lab=b.parentElement&&b.parentElement.firstElementChild;if(lab)lab.textContent=SHOP[b.dataset.buy]+" — "+fa(cost)+" سکه";
+    b.disabled=!ok||state.coins<cost;
+  });
   $("retry").classList.toggle("hidden",serverReady||connecting||booting);
   $("status").textContent=(connecting||booting)?"در حال اتصال...":!serverReady?"خطا در اتصال":busy&&taskLabel?"در حال انجام کار":g>=100&&state.planted?"آماده برداشت":state.planted?"نخل در حال رشد":state.prepared?"گودال آماده کاشت":"زمین آماده کاشت";
   $("stage").textContent=g>=100&&state.planted?"نخل بارده":state.planted?"نهال مجول":state.prepared?"آماده کاشت":"زمین آماده نشده";
-  $("hint").textContent=(connecting||booting)?"در حال دریافت اطلاعات نخلستان...":!serverReady?(lastError||"برای شروع باید اتصال تلگرام برقرار شود."):busy&&taskLabel?taskLabel+"... تا پایان کار صبر کن.":
+  $("hint").textContent=(serverReady&&state.gate)?"🔒 برای ادامهٔ بازی، مأموریت روزانه (ارسال لینک برای ۵ نفر) را انجام بده.":state.step_ms>10000&&serverReady&&!busy?"هر مرحله ۱۰ دقیقه طول می‌کشد؛ می‌توانی صفحه را ببندی و بعداً برگردی.":(connecting||booting)?"در حال دریافت اطلاعات نخلستان...":!serverReady?(lastError||"برای شروع باید اتصال تلگرام برقرار شود."):busy&&taskLabel?taskLabel+"... تا پایان کار صبر کن.":
     !state.prepared&&!state.planted?"برای شروع، زمین را آماده کن.":!state.planted&&state.seedling<1?"نهال نداری؛ از فروشگاه نهال بخر.":!state.planted?"گودال آماده است؛ نهال مجول را بکار.":
     g>=100?"خرما آماده برداشت است.":!state.watered&&state.water<1?"آب نداری؛ از فروشگاه آب بخر.":!state.watered?"نهال را آبیاری کن.":
     !state.fertilized&&state.fertilizer<1?"کود نداری؛ از فروشگاه کود بخر.":!state.fertilized?"مرحله بعد، کوددهی نخل است.":"مراحل مراقبت از نخل را انجام بده.";
@@ -585,28 +617,32 @@ function ui(){
   box.innerHTML="";needs.forEach(n=>{const r=document.createElement("div");r.textContent=n.text;box.appendChild(r);});
   box.classList.toggle("show",needs.length>0);
   document.querySelectorAll("[data-buy]").forEach(b=>b.classList.toggle("pulse",needs.some(n=>n.key===BUY_KEYS[b.dataset.buy])));
-  $("buildInfo").textContent=(connecting||booting)?"در حال اتصال...":!serverReady?"اتصال برقرار نیست":TIER_NAMES[tierOf(state.level)]+(isAdmin?" · ادمین ✓":"");
+  $("buildInfo").textContent=(connecting||booting)?"در حال اتصال...":!serverReady?"اتصال برقرار نیست":tierName(tierOf(state.level))+(isAdmin?" · ادمین ✓":"");
   $("sceneLabel").textContent=titles[getSceneStage()]||titles.land;
 }
 
 function runTimer(task){
   return new Promise(resolve=>{
-    const b=$(task.btn),fill=b.querySelector(".fill"),te=b.querySelector("b")||b.querySelector(".btn-text"),old=te.textContent,start=Date.now();
+    const b=$(task.btn),fill=b.querySelector(".fill"),te=b.querySelector("b")||b.querySelector(".btn-text"),old=te.textContent,start=task.start||Date.now();
     b.classList.add("working");
     const finish=()=>{clearInterval(timer);fill.style.width="0";te.textContent=old;b.classList.remove("working");resolve();};
     const tick=()=>{
       const el=Date.now()-start,left=Math.max(0,Math.ceil((task.ms-el)/1000));
-      fill.style.width=Math.min(100,el/task.ms*100)+"%";te.textContent=old+" ("+fa(left)+")";
+      fill.style.width=Math.min(100,el/task.ms*100)+"%";te.textContent=old+" ("+(left>=60?fa(Math.floor(left/60))+":"+fa(String(left%60).padStart(2,"0")):fa(left))+")";
       if(el>=task.ms)finish();
     };
     const timer=setInterval(tick,100);tick();
   });
 }
-async function perform(action){
+const PEND_KEY="nakh_pending";
+function savePend(a,t){try{if(a)localStorage.setItem(PEND_KEY,JSON.stringify({a,t}));else localStorage.removeItem(PEND_KEY);}catch{}}
+async function perform(action,resumeAt){
   if(!serverReady||busy)return;
-  const task=TASKS[action];busy=true;
+  if(state.gate){toast("🔒 ابتدا مأموریت روزانه را انجام بده.");openTab("missions");return;}
+  const base0=TASKS[action];busy=true;
+  const task=base0?{...base0,ms:state.step_ms||base0.ms,start:resumeAt||Date.now()}:null;
   try{
-    if(task){taskLabel=task.label;actionPreview=task.stage;ui();await runTimer(task);}else ui();
+    if(task){savePend(action,task.start);taskLabel=task.label;actionPreview=task.stage;ui();await runTimer(task);}else ui();
     const before=getNeeds().map(n=>n.key);
     const res=await api("/api/action",{action});
     applyServerState(res.state);
@@ -614,7 +650,7 @@ async function perform(action){
     const base=res.message||"ثبت شد";
     toast(nn.length?base+" — "+nn[0].text:base);
   }catch(e){toast(e.message);}
-  finally{busy=false;taskLabel="";actionPreview=null;ui();}
+  finally{savePend(null);busy=false;taskLabel="";actionPreview=null;ui();}
 }
 $("dig").addEventListener("click",()=>perform("prepare"));
 $("plant").addEventListener("click",()=>perform("plant"));
@@ -645,7 +681,7 @@ function resizeRun(){
   rc.width=Math.round(RW*RDPR);rc.height=Math.round(RH*RDPR);rx.setTransform(RDPR,0,0,RDPR,0,0);
 }
 function layout(){LS=RH/360;LGY=RH*.72;LPX=RW*(RW>RH*1.4?.14:.17);LPPM=LS*16;}
-function speedAt(d){return 9+Math.min(13,Math.floor(d/100)*1.5);}
+function speedAt(d){return Math.min(22.5,9+Math.floor(d/100)*1.5+(d>600?(d-600)/200:0));}
 function mod(a,b){return((a%b)+b)%b;}
 function runLevel(){const p=(runnerStats.total_dates||0)+20*(runnerStats.total_majool||0);return 1+Math.floor(Math.sqrt(p/60));}
 function renderRunnerInfo(){
@@ -676,6 +712,7 @@ function runJump(){
 
 async function startRun(){
   if(R.running||R.busySend||!serverReady)return;
+  if(state.gate){toast("🔒 ابتدا مأموریت روزانه را انجام بده.");openTab("missions");return;}
   $("runStart").disabled=true;
   try{
     const res=await api("/api/run/start");
@@ -690,8 +727,11 @@ function spawn(){
   const viewM=(RW-LPX)/LPPM+8;
   while(R.nextM<R.dist+viewM){
     const d=R.nextM,lvl=Math.floor(d/100),sp=speedAt(d);
-    let k;
-    if(lvl>=1&&R.last!=="bird"&&Math.random()<Math.min(.36,.14+lvl*.03))k="bird";
+    let k,span=0;
+    const lows=["stump","bucket","rock"];
+    const cluster=d>=600&&Math.random()<Math.min(.65,.3+(d-600)/3000);
+    if(cluster)k=lows[Math.floor(Math.random()*3)];
+    else if(lvl>=1&&R.last!=="bird"&&Math.random()<Math.min(.36,.14+lvl*.03))k="bird";
     else{
       const pool=["stump","bucket"];
       if(lvl>=1)pool.push("rock","wide");
@@ -717,10 +757,16 @@ function spawn(){
       [[-1.8,86],[0,102],[1.8,86]].forEach(a=>R.objs.push({m:d+a[0],k:"date",h:a[1]}));
     }
     R.objs.push({m:d,k});
-    R.prevM=d;R.last=k;
+    if(cluster){
+      const n=Math.random()<.55?3:2,gap2=n===3?1.8:2.3;
+      for(let j=1;j<n;j++)R.objs.push({m:d+j*gap2,k:lows[Math.floor(Math.random()*3)]});
+      span=(n-1)*gap2;
+      R.bannerT=n===3?"⚠ سه مانع پشت‌سرهم!":"⚠ دو مانع!";R.banner=1.2;
+    }
+    R.prevM=d+span;R.last=k;
     /* هر ۱۰۰ متر فاصله‌ها کمتر می‌شود (حداقل ۰٫۸۵ ثانیه تا همیشه جای پرش و فرود باشد) */
-    const gapS=Math.max(.9,1.75-lvl*.1)+Math.random()*Math.max(.25,.7-lvl*.04);
-    R.nextM=d+gapS*Math.max(sp,R.base)*1.2;
+    const gapS=Math.max(.8,1.75-lvl*.1)+Math.random()*Math.max(.2,.7-lvl*.04);
+    R.nextM=d+span+gapS*Math.max(sp,R.base)*1.2;
   }
 }
 
@@ -947,6 +993,29 @@ function runDraw(dt,idle){
     for(let i=0;i<16;i++){const yy=(i*47)%RH,xx=mod(i*83-gameTime*420,RW+80)-40;c.beginPath();c.moveTo(xx,yy);c.lineTo(xx+34,yy+2);c.stroke();}
     c.globalAlpha=1;
   }
+  /* هوای بارانی و برفی بعد از ۲۰۰۰ متر */
+  if(d>=2000){
+    const wi=Math.floor((d-2000)/1500)%2,wa=Math.min(1,(d-2000)/150);
+    c.globalAlpha=wa;
+    if(wi===0){
+      c.fillStyle="#10203a55";c.fillRect(0,0,RW,RH);
+      c.strokeStyle="#d6ebff";c.lineWidth=1.3;c.globalAlpha=.6*wa;
+      for(let i=0;i<70;i++){const yy=mod(i*37+gameTime*640,RH+40)-20,xx=mod(i*61-gameTime*150,RW+40)-20;c.beginPath();c.moveTo(xx,yy);c.lineTo(xx-5,yy+17);c.stroke();}
+      c.globalAlpha=.5*wa;c.fillStyle="#9fd0ff";
+      for(let i=0;i<6;i++){const xx=mod(i*131-d*pp*.9,RW+80)-40,rr=(gameTime*3+i)%1;c.beginPath();c.ellipse(xx,gy+10+(i%3)*9,6+rr*10,2+rr*2,0,0,6.3);c.fill();}
+      if(Math.sin(gameTime*.9)>.992){c.globalAlpha=.55;c.fillStyle="#fff";c.fillRect(0,0,RW,RH);}
+    }else{
+      c.fillStyle="#e6f0ff33";c.fillRect(0,0,RW,RH);
+      c.globalAlpha=.28*wa;
+      const ag=c.createLinearGradient(0,0,RW,0);ag.addColorStop(0,"#3dffb0");ag.addColorStop(.5,"#6b8bff");ag.addColorStop(1,"#d96bff");
+      c.fillStyle=ag;c.beginPath();c.moveTo(0,gy*.1);for(let x=0;x<=RW;x+=12)c.lineTo(x,gy*(.16+Math.sin(x/70+gameTime)*.05));c.lineTo(RW,gy*.38);for(let x=RW;x>=0;x-=12)c.lineTo(x,gy*(.34+Math.sin(x/60+gameTime*.8)*.05));c.closePath();c.fill();
+      c.globalAlpha=wa;c.fillStyle="#fff";
+      for(let i=0;i<80;i++){const yy=mod(i*29+gameTime*(55+(i%5)*16),RH+10)-5,xx=mod(i*47+Math.sin(gameTime+i)*22,RW);c.beginPath();c.arc(xx,yy,1.4+(i%3)*.7,0,6.3);c.fill();}
+      c.fillStyle="#ffffffdd";c.fillRect(0,gy-1,RW,6);
+    }
+    c.globalAlpha=1;
+  }
+  if(R.banner>0&&R.running){R.banner-=dt;c.fillStyle="#fff";c.font="bold 15px Tahoma,sans-serif";c.textAlign="center";c.shadowColor="#000a";c.shadowBlur=5;c.fillText(R.bannerT,RW/2,RH*.3);c.shadowBlur=0;}
   /* نوشته‌ها */
   c.fillStyle="#fff";c.font="bold 13px Tahoma,sans-serif";
   c.shadowColor="#0008";c.shadowBlur=4;
@@ -997,8 +1066,8 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden&&R.running)
 function renderRef(){
   const c=Math.min(refInfo.count,refInfo.need);
   $("refBar").style.width=(c/refInfo.need*100)+"%";
-  $("refCount").textContent=fa(refInfo.count)+" از "+fa(refInfo.need);
-  $("refState").textContent=refInfo.claimed?"✓ جایزهٔ امروز گرفته شد":refInfo.count>=refInfo.need?"آمادهٔ دریافت":"";
+  $("refCount").textContent=fa(refInfo.count)+" از "+fa(refInfo.need)+" ارسال";
+  $("refState").textContent=refInfo.claimed?"✓ جایزهٔ امروز گرفته شد":refInfo.count>=refInfo.need?"آمادهٔ دریافت":(state.gate?"🔒 بازی تا انجام این مأموریت بسته است":"");
   $("refLink").textContent=refInfo.link||"لینک دعوت هنوز تنظیم نشده است";
   $("refClaim").disabled=!serverReady||refInfo.claimed||refInfo.count<refInfo.need;
   $("refCopy").disabled=!refInfo.link;$("refShare").disabled=!refInfo.link;
@@ -1022,6 +1091,7 @@ $("refCopy").addEventListener("click",async()=>{
 $("refShare").addEventListener("click",()=>{
   const u="https://t.me/share/url?url="+encodeURIComponent(refInfo.link)+"&text="+encodeURIComponent("بیا نخلستان ماهان گچساران را بازی کنیم! 🌴");
   if(tg&&tg.openTelegramLink)tg.openTelegramLink(u);else window.open(u,"_blank","noopener");
+  api("/api/mission/share").then(r=>{refInfo=r.ref;renderRef();toast(refInfo.count>=refInfo.need?"✅ ۵ ارسال کامل شد؛ جایزه را بگیر":"ارسال "+fa(refInfo.count)+" از "+fa(refInfo.need)+" ثبت شد");}).catch(e=>toast(e.message));
 });
 
 /* ========= رتبه‌بندی ========= */
